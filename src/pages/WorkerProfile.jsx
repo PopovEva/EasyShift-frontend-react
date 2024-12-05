@@ -1,53 +1,73 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import WorkerProfileData from './WorkerOptions/WorkerProfileData';
+import WeeklySchedule from './WorkerOptions/WeeklySchedule';
+import SubmitShifts from './WorkerOptions/SubmitShifts';
 import API from '../api/axios';
 
 const WorkerProfile = () => {
-  const [profileData, setProfileData] = useState(null);
-  const [schedule, setSchedule] = useState([]);
+  const [activeOption, setActiveOption] = useState('profile'); // Default option
+  const [branchId, setBranchId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
       try {
-        // Получаем данные профиля
         const response = await API.get('/user-info/');
-        setProfileData(response.data);
-
-        // Получаем расписание текущей недели
-        const scheduleResponse = await API.get('/schedules/', {
-          params: { branch: response.data.branch },
-        });
-        setSchedule(scheduleResponse.data);
+        setBranchId(response.data.branch);
       } catch (err) {
-        setError('Failed to load profile or schedule');
+        setError('Failed to load profile data');
       }
     };
-
-    fetchProfile();
+    fetchProfileData();
   }, []);
-
-  if (error) {
-    return <p style={{ color: 'red' }}>{error}</p>;
-  }
-
-  if (!profileData) {
-    return <p>Loading...</p>;
-  }
+  
+  // Render active component
+  const renderOption = () => {
+    switch (activeOption) {
+      case 'profile':
+        return <WorkerProfileData />;
+      case 'schedule':
+        return branchId ? <WeeklySchedule branchId={branchId} /> : <p>Loading schedule...</p>;
+      case 'submit-shifts':
+        return <SubmitShifts />;
+      default:
+        return <WorkerProfileData />;
+    }
+  };
 
   return (
     <div>
       <Navbar />
-      <h1>Worker Profile</h1>
-      <p>Welcome, {profileData.first_name}!</p>
-      <h2>Your Schedule for this week</h2>
-      <ul>
-        {schedule.map((shift) => (
-          <li key={shift.id}>
-            {shift.date} - {shift.shift_type} in {shift.room}
-          </li>
-        ))}
-      </ul>
+      <div className="d-flex vh-100">
+        {/* Sidebar */}
+        <div className="bg-light p-3" style={{ width: '20%' }}>
+          <h4 className="mb-4">Worker Panel</h4>
+          <ul className="nav flex-column">
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100" onClick={() => setActiveOption('profile')}>
+                Profile Data
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('schedule')}>
+                Weekly Schedule
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('submit-shifts')}>
+                Submit Shifts
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        {/* Main Content */}
+        <div className="p-3 flex-grow-1">
+          {renderOption()}
+        </div>
+      </div>
     </div>
   );
 };

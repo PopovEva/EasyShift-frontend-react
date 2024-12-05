@@ -6,9 +6,12 @@ import EmployeesList from './AdminOptions/EmployeesList';
 import CreateSchedule from './AdminOptions/CreateSchedule';
 import RoomsList from './AdminOptions/RoomsList';
 import BranchesList from './AdminOptions/BranchesList';
+import WeeklySchedule from './AdminOptions/WeeklySchedule';
+import AdminScheduleManagement from './AdminOptions/AdminScheduleManagement'; 
 
 const AdminProfile = () => {
   const [profileData, setProfileData] = useState(null);
+  const [branchId, setBranchId] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
   const [activeOption, setActiveOption] = useState('profile');
@@ -26,6 +29,10 @@ const AdminProfile = () => {
           return <RoomsList />;
         case 'branches':
           return <BranchesList />;
+        case 'weekly-schedule':
+          return <WeeklySchedule />;
+        case 'manage-schedules':
+          return branchId ? <AdminScheduleManagement branchId={branchId} /> : <p>Loading...</p>;    
         default:
           return <AdminProfileData />;
       }
@@ -34,11 +41,13 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        // Получаем данные профиля администратора
+        // Fetch admin profile data
         const response = await API.get('/user-info/');
         setProfileData(response.data);
-
-        // Получаем список сотрудников
+        setBranchId(response.data.branch);
+        // Save branch ID in sessionStorage for later use
+        sessionStorage.setItem('branch_id',response.data.branch);
+        // Fetch employees for the branch
         const employeesResponse = await API.get('/employees/', {
           params: { branch: response.data.branch },
         });
@@ -62,31 +71,51 @@ const AdminProfile = () => {
   return (
     <div>
       <Navbar />
-      <div style={{ display: 'flex', height: '100vh' }}>
+      <div className="d-flex vh-100">
         {/* Панель управления */}
-        <div style={{ width: '20%', backgroundColor: '#f8f9fa', padding: '20px' }}>
-          <h2>Admin Panel</h2>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li>
-              <button onClick={() => setActiveOption('profile')}>Profile Data</button>
+        <div className="bg-light p-3" style={{ width: '20%' }}>
+          <h4 className="mb-4">Admin Panel</h4>
+          <ul className="nav flex-column">
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('profile')}>
+                Profile Data
+              </button>
             </li>
-            <li>
-              <button onClick={() => setActiveOption('employees')}>Employees</button>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('employees')}>
+                Employees
+              </button>
             </li>
-            <li>
-              <button onClick={() => setActiveOption('schedule')}>Create Schedule</button>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('schedule')}>
+                Create Schedule
+              </button>
             </li>
-            <li>
-              <button onClick={() => setActiveOption('rooms')}>Rooms</button>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('rooms')}>
+                Rooms
+              </button>
             </li>
-            <li>
-              <button onClick={() => setActiveOption('branches')}>Branches</button>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('branches')}>
+                Branches
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('weekly-schedule')}>
+                Weekly Schedule
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('manage-schedules')}>
+                Manage Schedules
+              </button>
             </li>
           </ul>
         </div>
 
         {/* Динамическая часть */}
-        <div style={{ width: '80%', padding: '20px' }}>
+        <div className="p-3 flex-grow-1">
           {renderOption()}
         </div>
       </div>
