@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import API from '../api/axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AdminProfileData from './AdminOptions/AdminProfileData';
 import EmployeesList from './AdminOptions/EmployeesList';
 import CreateSchedule from './AdminOptions/CreateSchedule';
@@ -54,6 +56,7 @@ const AdminProfile = () => {
         setEmployees(employeesResponse.data);
       } catch (err) {
         setError('Failed to load admin data or employees');
+        toast.error('Failed to load admin data or employees');
       }
     };
 

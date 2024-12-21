@@ -5,8 +5,6 @@ const Navbar = () => {
   return (
     <nav>
       <Link to="/">Log Out</Link>
-      {/* <Link to="/worker-profile">Worker Profile</Link>
-      <Link to="/admin-profile">Admin Profile</Link> */}
     </nav>
   );
 };

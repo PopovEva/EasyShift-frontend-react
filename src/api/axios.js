@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 // Создаем экземпляр Axios
 const API = axios.create({
@@ -15,6 +16,7 @@ API.interceptors.request.use(
     return config;
   },
   (error) => {
+    toast.error('Ошибка при отправке запроса!'); // Показываем уведомление об ошибке
     return Promise.reject(error); // Обрабатываем ошибки в запросе
   }
 );
@@ -27,8 +29,10 @@ API.interceptors.response.use(
     const refreshToken = localStorage.getItem('refresh_token');
 
     // Если токен истек и есть refresh-токен
-    if (error.response && error.response.status === 401 && !originalRequest._retry && refreshToken) {
-      originalRequest._retry = true; // Пометка для предотвращения зацикливания
+    if (error.response) {
+      // Обработка ошибки 401 (Unauthorized)
+      if (error.response.status === 401 && !originalRequest._retry && refreshToken) {
+        originalRequest._retry = true;
       try {
         // Обновляем access-токен
         const response = await axios.post('http://localhost:8000/api/token/refresh/', {
@@ -41,9 +45,22 @@ API.interceptors.response.use(
         localStorage.removeItem('access_token'); // Удаляем старые токены
         localStorage.removeItem('refresh_token');
         window.location.href = '/'; // Перенаправляем на страницу логина
+        toast.error('Сессия истекла. Пожалуйста, войдите снова.');
         return Promise.reject(refreshError);
       }
     }
+    // Обработка других ошибок
+    if (error.response.status === 403) {
+      toast.error('Доступ запрещен!');
+    } else if (error.response.status === 500) {
+      toast.error('Ошибка сервера!');
+    } else {
+      toast.error(`Ошибка: ${error.response.data.detail || 'Произошла ошибка'}`);
+    }
+  } else {
+    // Обработка сетевых ошибок
+    toast.error('Ошибка соединения с сервером.');
+  }
 
     return Promise.reject(error); // Обрабатываем остальные ошибки
   }

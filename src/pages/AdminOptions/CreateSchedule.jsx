@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; 
 
 const CreateSchedule = () => {
   const [startDate, setStartDate] = useState("");
@@ -19,6 +21,7 @@ const CreateSchedule = () => {
         setRooms(response.data);
       } catch (err) {
         setError("Failed to load rooms");
+        toast.error("Failed to load rooms");
       }
     };
     
@@ -44,7 +47,7 @@ const CreateSchedule = () => {
   // Generate schedule template
   const generateSchedule = () => {
     if (!startDate || selectedRooms.length === 0) {
-      alert("Please select a start date and at least one room");
+      toast.error("Please select a start date and at least one room");
       return;
     }
 
@@ -71,6 +74,7 @@ const CreateSchedule = () => {
     }));
 
     setSchedule(scheduleTemplate);
+    toast.success("Schedule generated successfully!");
   };
 
   // Save schedule
@@ -78,7 +82,7 @@ const CreateSchedule = () => {
     try {
       const branchId = sessionStorage.getItem("branch_id");
       if (!branchId) {
-        alert("Branch ID is missing. Please log in again.");
+        toast.error("Branch ID is missing. Please log in again.");
         return;
       }
 
@@ -103,10 +107,11 @@ const CreateSchedule = () => {
       console.log("Request Payload:", requestBody);
 
       const response = await API.post("/create-schedule/", requestBody);
-      alert("Schedule saved successfully!");
+      toast.success("Schedule saved successfully!");
       console.log("Response Data:", response.data);
     } catch (err) {
       setError("Failed to save schedule");
+      toast.error("Failed to save schedule");
       console.error("Error Details:", err.response?.data || err.message);
     }
   };

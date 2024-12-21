@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
     const  navigate = useNavigate();
@@ -19,6 +21,9 @@ const Login = () => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
 
+            // Уведомление об успешной авторизации
+            toast.success('Login successful!');
+
             //geting user info
             const userInfo = await axios.get('http://localhost:8000/api/user-info/', {
                 headers:{
@@ -33,9 +38,11 @@ const Login = () => {
                 navigate('/worker-profile');
             } else {
                 setError('User group not recognized');
+                toast.error('User group not recognized');
             }
         } catch (err){
             setError('Invalid username or password');
+            toast.error('Invalid username or password');
         }
     };
 

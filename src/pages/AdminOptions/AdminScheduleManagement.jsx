@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API from "../../api/axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AdminScheduleManagement = ({ branchId }) => {
   const [schedules, setSchedules] = useState([]); // Данные расписания
@@ -27,6 +29,7 @@ const AdminScheduleManagement = ({ branchId }) => {
       } catch (error) {
         console.error("Error fetching available weeks:", error);
         setError("Failed to fetch available weeks");
+        toast.error("Failed to fetch available weeks");
       }
     };
 
@@ -46,6 +49,7 @@ const AdminScheduleManagement = ({ branchId }) => {
       } catch (err) {
         console.error("Ошибка при загрузке расписания:", err.response?.data || err.message);
         setError("Failed to fetch schedules");
+        toast.error("Failed to fetch schedules");
         setSchedules([]); // Если ошибка, очищаем данные
       }
     };
@@ -95,10 +99,10 @@ const AdminScheduleManagement = ({ branchId }) => {
         branch_id: branchId,
         schedules: schedules,
       });
-      alert("Schedule updated successfully!");
+      toast.success("Schedule updated successfully!");
     } catch (err) {
       console.error("Failed to save schedule:", err.response?.data || err.message);
-      alert("Failed to update schedule.");
+      toast.error("Failed to update schedule.");
     }
   };
 
@@ -110,10 +114,10 @@ const AdminScheduleManagement = ({ branchId }) => {
         schedules: schedules,
         status: "APPROVED", 
       });
-      alert("Schedule approved successfully!");
+      toast.success("Schedule approved successfully!");
     } catch (err) {
       console.error("Failed to approve schedule:", err.response?.data || err.message);
-      alert("Failed to approve schedule.");
+      toast.error("Failed to approve schedule.");
     }
   };
 

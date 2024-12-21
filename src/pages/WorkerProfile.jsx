@@ -4,11 +4,12 @@ import WorkerProfileData from './WorkerOptions/WorkerProfileData';
 import WeeklySchedule from './WorkerOptions/WeeklySchedule';
 import SubmitShifts from './WorkerOptions/SubmitShifts';
 import API from '../api/axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const WorkerProfile = () => {
   const [activeOption, setActiveOption] = useState('profile'); // Default option
   const [branchId, setBranchId] = useState(null);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -16,7 +17,7 @@ const WorkerProfile = () => {
         const response = await API.get('/user-info/');
         setBranchId(response.data.branch);
       } catch (err) {
-        setError('Failed to load profile data');
+        toast.error('Failed to load profile data');
       }
     };
     fetchProfileData();
