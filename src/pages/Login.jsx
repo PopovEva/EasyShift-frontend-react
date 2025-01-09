@@ -2,10 +2,13 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { setUser, setTokens } from '../slices/userSlice';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
     const  navigate = useNavigate();
+    const dispatch = useDispatch();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
@@ -18,6 +21,8 @@ const Login = () => {
                 password,
             });
 
+            // Сохраняем токены в Redux и localStorage
+            dispatch(setTokens({ access: response.data.access, refresh: response.data.refresh }));
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
 
@@ -30,6 +35,8 @@ const Login = () => {
                     Authorization: `Bearer ${response.data.access}`,
                 },
             });
+
+            dispatch(setUser(userInfo.data)); // Сохраняем данные пользователя в Redux
 
             //chek groop
             if (userInfo.data.group === 'Admin') {

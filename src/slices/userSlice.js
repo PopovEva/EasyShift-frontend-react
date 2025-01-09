@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  user: null, // Информация о пользователе
+  user: null,
   tokens: {
     access: null,
     refresh: null,
@@ -13,6 +13,7 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
+      console.log('User data received:', action.payload);
       state.user = action.payload;
     },
     clearUser: (state) => {
