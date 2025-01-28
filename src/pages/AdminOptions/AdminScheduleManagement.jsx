@@ -14,14 +14,22 @@ const AdminScheduleManagement = ({ branchId }) => {
     (state) => state.schedule
   );
 
+  useEffect(() => {
+    console.log("Available weeks:", availableWeeks);
+    console.log("Selected week:", selectedWeek);
+  }, [availableWeeks, selectedWeek]);
+
   const [localSchedules, setLocalSchedules] = useState([]);
   const [employees, setEmployees] = useState([]); // Список сотрудников филиала
 
   // Получение доступных недель и сотрудников
   useEffect(() => {
     if (branchId) {
-      dispatch(fetchAvailableWeeks(branchId)); // Загружаем доступные недели
+      console.log("Branch ID:", branchId); // Логируем branchId для проверки
+      dispatch(fetchAvailableWeeks({ branchId, statuses: ["draft", "approved"] })); // Загружаем доступные недели
       fetchEmployees(branchId); // Загружаем сотрудников филиала
+    } else {
+      console.error("Branch ID is missing. Please provide a valid branch ID.");
     }
   }, [branchId]);
 
@@ -40,38 +48,75 @@ const AdminScheduleManagement = ({ branchId }) => {
 
   useEffect(() => {
     if (availableWeeks.length > 0 && !selectedWeek) {
-      const lastWeek = availableWeeks[availableWeeks.length - 1]; // Берём последнюю доступную неделю
-      console.log("Selected week set to:", lastWeek);
-      dispatch(setSelectedWeek(lastWeek));
+      const today = new Date();
+      const currentSunday = new Date(today);
+      currentSunday.setDate(today.getDate() - today.getDay()); // Ближайшее воскресенье
+  
+      // Найти ближайшую неделю
+      const closestWeek = availableWeeks.find(
+        (week) => new Date(week) >= currentSunday
+      );
+  
+      // Если ближайшая неделя не найдена, взять последнюю
+      const fallbackWeek = availableWeeks[availableWeeks.length - 1];
+      dispatch(setSelectedWeek(closestWeek || fallbackWeek));
     }
-  }, [availableWeeks, dispatch, selectedWeek]);
+  }, [availableWeeks, selectedWeek, dispatch]);
 
   // Загрузка расписания для выбранной недели
   useEffect(() => {
     const fetchSchedulesForWeek = async () => {
       if (!selectedWeek || !branchId) return;
+    
       try {
-        const response = await API.get(`/get-schedule/${branchId}/draft`, {
-          params: { week_start_date: selectedWeek },
+        // Запросы для драфтовых и одобренных расписаний
+        const [draftResponse, approvedResponse] = await Promise.all([
+          API.get(`/get-schedule/${branchId}/draft`, { params: { week_start_date: selectedWeek } }),
+          API.get(`/get-schedule/${branchId}/approved`, { params: { week_start_date: selectedWeek } }),
+        ]);
+    
+        // Объединяем результаты
+        const draftData = draftResponse.data || [];
+        const approvedData = approvedResponse.data || [];
+        const combinedSchedules = [...draftData, ...approvedData];
+    
+        // Привязываем сотрудников к расписаниям
+        const schedulesWithEmployees = combinedSchedules.map((schedule) => {
+          const employee = employees.find((emp) => emp.id === schedule.employee_id);
+          return {
+            ...schedule,
+            employee_name: employee
+              ? `${employee.user.first_name} ${employee.user.last_name}`
+              : "Not assigned",
+          };
         });
-        setLocalSchedules(response.data);
+    
+        setLocalSchedules(schedulesWithEmployees);
       } catch (err) {
         console.error("Failed to fetch schedules:", err.response?.data || err.message);
-        toast.error("Failed to fetch schedules");
+        toast.error("Failed to fetch schedules.");
+        setLocalSchedules([]);
       }
     };
-
+  
     fetchSchedulesForWeek();
   }, [branchId, selectedWeek]);
 
   // Обновление сотрудника в локальном состоянии
   const updateEmployee = (day, shiftType, room, employeeId) => {
+    const selectedEmployee = employees.find((emp) => emp.id === employeeId);
     setLocalSchedules((prevSchedules) =>
       prevSchedules.map((schedule) =>
         schedule.day === day &&
         schedule.shift_details.shift_type === shiftType &&
         schedule.shift_details.room === room
-          ? { ...schedule, employee_id: employeeId }
+          ? { 
+              ...schedule, 
+              employee_id: employeeId, 
+              employee_name: selectedEmployee
+                ? `${selectedEmployee.user.first_name} ${selectedEmployee.user.last_name}`
+                : null 
+            }
           : schedule
       )
     );
@@ -101,8 +146,13 @@ const AdminScheduleManagement = ({ branchId }) => {
     try {
       await API.post(`/update-schedule/`, {
         branch_id: branchId,
-        schedules: localSchedules,
-        status: "APPROVED",
+        schedules: localSchedules.map((schedule) => ({
+          week_start_date: schedule.week_start_date,
+          day: schedule.day,
+          shift_details: schedule.shift_details,
+          employee_id: schedule.employee_id || null,
+        })),
+        status: "approved",
       });
       toast.success("Schedule approved successfully!");
     } catch (err) {
@@ -126,6 +176,29 @@ const AdminScheduleManagement = ({ branchId }) => {
   };
 
   if (loading) return <p>Loading schedules...</p>;
+
+  if (!availableWeeks.length) {
+    return (
+      <div>
+        <h2>Admin Schedule Management</h2>
+        <p className="text-danger">
+          No schedules exist at the moment. Please create a new schedule to proceed.
+        </p>
+      </div>
+    );
+  }
+
+  if (!localSchedules.length) {
+    return (
+      <div>
+        <h2>Admin Schedule Management</h2>
+        <p className="text-warning">
+          No schedules exist for the selected week. Please create a new schedule or select another week.
+        </p>
+      </div>
+    );
+  }
+
   if (error) {
     toast.error(error);
     return <p className="text-danger">Error loading schedules</p>;
@@ -201,20 +274,17 @@ const AdminScheduleManagement = ({ branchId }) => {
                             value={currentSchedule?.employee_id || ""}
                             onChange={(e) => updateEmployee(day, shift, room, Number(e.target.value))}
                           >
-                            {currentSchedule?.employee_id && (
+                            <option value="">None</option>
+                            {employees.map((employee) => (
+                              <option key={employee.id} value={employee.id}>
+                                {employee.user.first_name} {employee.user.last_name}
+                              </option>
+                            ))}
+                            {currentSchedule?.employee_id && !employees.find(emp => emp.id === currentSchedule.employee_id) && (
                               <option value={currentSchedule.employee_id}>
-                                {employees.find((emp) => emp.id === currentSchedule.employee_id)?.user.first_name || "Not assigned"}{" "}
-                                {employees.find((emp) => emp.id === currentSchedule.employee_id)?.user.last_name || ""}
+                                {currentSchedule.employee_name}
                               </option>
                             )}
-                            <option value="">None</option>
-                            {employees
-                              .filter((emp) => emp.id !== currentSchedule?.employee_id)
-                              .map((employee) => (
-                                <option key={employee.id} value={employee.id}>
-                                  {employee.user.first_name} {employee.user.last_name}
-                                </option>
-                              ))}
                           </select>
                         </td>
                       );

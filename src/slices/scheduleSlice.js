@@ -4,9 +4,11 @@ import API from "../api/axios";
 // Fetch available weeks
 export const fetchAvailableWeeks = createAsyncThunk(
   "schedule/fetchAvailableWeeks",
-  async (branchId, { rejectWithValue }) => {
+  async ({ branchId, statuses = ["draft", "approved"] }, { rejectWithValue }) => {
     try {
-      const response = await API.get(`/available-weeks/${branchId}`);
+      const response = await API.get(`/available-weeks/${branchId}`, {
+        params: { status: statuses },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

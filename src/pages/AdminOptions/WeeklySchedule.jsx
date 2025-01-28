@@ -20,10 +20,18 @@ const WeeklySchedule = () => {
 
     const fetchAvailableWeeks = async () => {
       try {
-        const response = await API.get(`/available-weeks/${branchId}`);
-        setAvailableWeeks(response.data);
-        if (response.data.length > 0) {
-          setSelectedWeek(response.data[0]);
+        const response = await API.get(`/available-weeks/${branchId}`, {
+          params: { status: "approved" }, // Добавляем параметр статуса
+        });
+        const approvedWeeks = response.data;
+
+        if (approvedWeeks.length > 0) {
+          setAvailableWeeks(approvedWeeks);
+          setSelectedWeek(approvedWeeks[0]); // Устанавливаем первую доступную неделю
+        } else {
+          setAvailableWeeks([]);
+          setSelectedWeek(""); // Если нет недель, сбрасываем выбор
+          setError("No published schedules are available at the moment.");
         }
       } catch (error) {
         console.error("Error fetching available weeks:", error);
@@ -114,11 +122,11 @@ const WeeklySchedule = () => {
                         s.week_start_date === selectedWeek // Убедимся, что неделя совпадает
                     );
                     
-                    // Логируем данные, чтобы убедиться, что они корректно находятся
-                    console.log(
-                      `Day: ${day}, Shift: ${shift}, Room: ${room}, Schedule:`,
-                      currentSchedule
-                    );
+                    // // Логируем данные, чтобы убедиться, что они корректно находятся
+                    // console.log(
+                    //   `Day: ${day}, Shift: ${shift}, Room: ${room}, Schedule:`,
+                    //   currentSchedule
+                    // );
 
                     return (
                       <td key={`${day}-${shift}-${room}`} className="align-middle">
@@ -136,18 +144,27 @@ const WeeklySchedule = () => {
   );
 };
 
-  const getDateForDay = (dayIndex) => {
-    if (!selectedWeek) return "";
-    const startDate = new Date(selectedWeek);
-    startDate.setDate(startDate.getDate() + dayIndex);
-    return startDate.toLocaleDateString("he-IL", {
-      day: "2-digit",
-      month: "2-digit",
-    });
-  };
+  // const getDateForDay = (dayIndex) => {
+  //   if (!selectedWeek) return "";
+  //   const startDate = new Date(selectedWeek);
+  //   startDate.setDate(startDate.getDate() + dayIndex);
+  //   return startDate.toLocaleDateString("he-IL", {
+  //     day: "2-digit",
+  //     month: "2-digit",
+  //   });
+  // };
 
   if (!branchId) {
     return <p className="text-danger">Branch ID is missing. Please check user data.</p>;
+  }
+
+  if (!availableWeeks.length) {
+    return (
+      <div>
+        <h2>Weekly Schedule</h2>
+        <p className="text-danger">No published schedules are available at the moment.</p>
+      </div>
+    );
   }
 
   if (error) {
