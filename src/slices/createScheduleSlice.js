@@ -15,7 +15,10 @@ const initialState = {
 // Асинхронное действие для получения списка комнат
 export const fetchRooms = createAsyncThunk('createSchedule/fetchRooms', async (_, thunkAPI) => {
   try {
-    const response = await API.get('/rooms/');
+    const branchId = sessionStorage.getItem('branch_id');
+    if (!branchId) throw new Error('Branch ID is missing');
+    
+    const response = await API.get(`/branches/${branchId}/rooms/`);
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue('Failed to fetch rooms');

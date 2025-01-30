@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const WorkerProfile = () => {
   const [activeOption, setActiveOption] = useState('profile'); // Default option
   const [branchId, setBranchId] = useState(null);
+  const [notifications, setNotifications] = useState([]); 
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -22,6 +23,21 @@ const WorkerProfile = () => {
     };
     fetchProfileData();
   }, []);
+
+  // Загрузка уведомлений
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await API.get("/employee-notifications/");
+        setNotifications(response.data);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+        toast.error("Failed to load notifications.");
+      }
+    };
+
+    fetchNotifications();
+  }, []);
   
   // Render active component
   const renderOption = () => {
@@ -32,6 +48,23 @@ const WorkerProfile = () => {
         return branchId ? <WeeklySchedule branchId={branchId} /> : <p>Loading schedule...</p>;
       case 'submit-shifts':
         return <SubmitShifts />;
+      case "notifications":
+        return (
+          <div>
+            <h2>📢 הודעות</h2>
+            {notifications.length > 0 ? (
+              <ul>
+                {notifications.map((notif) => (
+                  <li key={notif.id}>
+                    <strong>{notif.created_at}</strong> - {notif.message}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>אין הודעות חדשות</p>
+            )}
+          </div>
+        );
       default:
         return <WorkerProfileData />;
     }
@@ -48,17 +81,22 @@ const WorkerProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100" onClick={() => setActiveOption('profile')}>
-                Profile Data
+                נתוני פרופיל
               </button>
             </li>
             <li className="nav-item mb-2">
               <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('schedule')}>
-                Weekly Schedule
+              לוח זמנים שבועי
               </button>
             </li>
             <li className="nav-item mb-2">
               <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('submit-shifts')}>
-                Submit Shifts
+              הגשת משמרות
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button className="btn btn-outline-warning w-100" onClick={() => setActiveOption("notifications")}>
+                📢 הודעות
               </button>
             </li>
           </ul>

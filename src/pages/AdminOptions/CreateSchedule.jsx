@@ -6,7 +6,6 @@ import {
   setSelectedRooms,
   setSchedule,
   setShifts,
-  updateEmployee,
 } from '../../slices/createScheduleSlice';
 import API from '../../api/axios';
 import { toast } from 'react-toastify';
@@ -17,6 +16,12 @@ const CreateSchedule = () => {
     useSelector((state) => state.createSchedule);
 
   useEffect(() => {
+    const branchId = sessionStorage.getItem('branch_id');
+    if (!branchId) {
+      toast.error('Branch ID is missing. Please log in again.');
+      return;
+    }
+  
     dispatch(fetchRooms());
   }, [dispatch]);
 
@@ -73,7 +78,7 @@ const CreateSchedule = () => {
           shift: shift.shift,
           rooms: shift.rooms.map((room) => ({
             room: room.room,
-            employee: room.employee || null,
+            // employee: room.employee || null,
             start_time: '08:00:00',
             end_time: '12:00:00',
           })),
@@ -94,9 +99,6 @@ const CreateSchedule = () => {
     }
   };
 
-  const handleEmployeeChange = (dayIndex, shiftIndex, roomIndex, employee) => {
-    dispatch(updateEmployee({ dayIndex, shiftIndex, roomIndex, employee }));
-  };
 
   return (
     <div>
@@ -119,11 +121,15 @@ const CreateSchedule = () => {
             dispatch(setSelectedRooms(Array.from(e.target.selectedOptions).map((o) => o.value)))
           }
         >
-          {rooms.map((room) => (
-            <option key={room.id} value={room.name}>
-              {room.name}
-            </option>
-          ))}
+          {rooms.length > 0 ? (
+            rooms.map((room) => (
+              <option key={room.id} value={room.name}>
+                {room.name}
+              </option>
+            ))
+          ) : (
+            <option disabled>No rooms available for this branch</option>
+          )}
         </select>
 
         <label className="form-label mt-3">Select Shifts:</label>
@@ -177,23 +183,7 @@ const CreateSchedule = () => {
                       <td className="text-center">{room}</td>
                       {schedule.map((day, dayIndex) => (
                         <td key={`${day.day}-${shift}-${room}`} className="text-center">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter employee"
-                            value={
-                              day.shifts[shiftIndex]?.rooms.find((r) => r.room === room)
-                                ?.employee || ''
-                            }
-                            onChange={(e) =>
-                              handleEmployeeChange(
-                                dayIndex,
-                                shiftIndex,
-                                day.shifts[shiftIndex]?.rooms.findIndex((r) => r.room === room),
-                                e.target.value
-                              )
-                            }
-                          />
+                          -
                         </td>
                       ))}
                     </tr>
