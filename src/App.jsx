@@ -1,3 +1,7 @@
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setUser } from './slices/userSlice';
+import API from './api/axios';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
@@ -6,8 +10,32 @@ import AdminProfile from './pages/AdminProfile';
 import PrivateRoute from './components/PrivateRoute';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import "./toastStyles.css";
 
 const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+      const loadUser = async () => {
+          const accessToken = localStorage.getItem('access_token');
+          if (!accessToken) return;
+      
+          try {
+              const userInfo = await API.get('/user-info/', {
+                  headers: { Authorization: `Bearer ${accessToken}` },
+              });
+              dispatch(setUser(userInfo.data));
+          } catch (error) {
+              console.error('Ошибка загрузки пользователя', error);
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('refresh_token');
+              window.location.href = '/';
+          }
+      };
+    
+      loadUser();
+  }, [dispatch]);
+
   return(
     <>
       <ToastContainer

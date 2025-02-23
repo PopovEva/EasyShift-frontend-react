@@ -17,7 +17,7 @@ const AdminProfile = () => {
   const [employees, setEmployees] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState(null);
-  const [activeOption, setActiveOption] = useState("profile");
+  const [activeOption, setActiveOption] = useState(sessionStorage.getItem("admin_active_tab") || "profile");
 
   // Загрузка данных администратора и сотрудников
   useEffect(() => {
@@ -114,7 +114,10 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("profile")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "profile");
+                  setActiveOption("profile");
+                }}
               >
                 Profile Data
               </button>
@@ -122,7 +125,10 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("employees")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "employees");
+                  setActiveOption("employees");
+                }}
               >
                 Employees
               </button>
@@ -130,7 +136,10 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("schedule")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "schedule");
+                  setActiveOption("schedule");
+                }}
               >
                 Create Schedule
               </button>
@@ -138,7 +147,10 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("rooms")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "rooms");
+                  setActiveOption("rooms");
+                }}
               >
                 Rooms
               </button>
@@ -146,7 +158,10 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("branches")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "branches");
+                  setActiveOption("branches");
+                }}
               >
                 Branches
               </button>
@@ -154,7 +169,10 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("weekly-schedule")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "weekly-schedule");
+                  setActiveOption("weekly-schedule");
+                }}
               >
                 Weekly Schedule
               </button>
@@ -162,13 +180,21 @@ const AdminProfile = () => {
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
-                onClick={() => setActiveOption("manage-schedules")}
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "manage-schedules");
+                  setActiveOption("manage-schedules");
+                }}
               >
                 Manage Schedules
               </button>
             </li>
             <li className="nav-item mb-2">
-              <button className="btn btn-outline-warning w-100" onClick={() => setActiveOption("notifications")}>
+              <button className="btn btn-outline-warning w-100" 
+              onClick={() => {
+                sessionStorage.setItem("admin_active_tab", "notifications");
+                setActiveOption("notifications");
+              }}
+              >
                 📢 Admin Notifications
               </button>
             </li>

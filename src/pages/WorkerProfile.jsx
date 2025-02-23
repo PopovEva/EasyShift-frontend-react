@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const WorkerProfile = () => {
-  const [activeOption, setActiveOption] = useState('profile'); // Default option
+  const [activeOption, setActiveOption] = useState(sessionStorage.getItem("worker_active_tab") || "profile");
   const [branchId, setBranchId] = useState(null);
   const [notifications, setNotifications] = useState([]); 
 
@@ -80,22 +80,39 @@ const WorkerProfile = () => {
           <ul className="nav flex-column">
             <li className="nav-item mb-2">
               <button
-                className="btn btn-outline-primary w-100" onClick={() => setActiveOption('profile')}>
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("worker_active_tab", "profile");
+                  setActiveOption("profile");
+                }}
+                >
                 נתוני פרופיל
               </button>
             </li>
             <li className="nav-item mb-2">
-              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('schedule')}>
+              <button className="btn btn-outline-primary w-100"
+              onClick={() => {
+                sessionStorage.setItem("worker_active_tab", "schedule");
+                setActiveOption("schedule");
+              }}>
               לוח זמנים שבועי
               </button>
             </li>
             <li className="nav-item mb-2">
-              <button className="btn btn-outline-primary w-100" onClick={() => setActiveOption('submit-shifts')}>
+              <button className="btn btn-outline-primary w-100"
+              onClick={() => {
+                sessionStorage.setItem("worker_active_tab", "submit-shifts");
+                setActiveOption("submit-shifts");
+              }}>
               הגשת משמרות
               </button>
             </li>
             <li className="nav-item mb-2">
-              <button className="btn btn-outline-warning w-100" onClick={() => setActiveOption("notifications")}>
+              <button className="btn btn-outline-warning w-100"
+              onClick={() => {
+                sessionStorage.setItem("worker_active_tab", "notifications");
+                setActiveOption("notifications");
+              }}>
                 📢 הודעות
               </button>
             </li>

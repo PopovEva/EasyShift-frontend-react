@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../api/axios";
+import { toast } from 'react-toastify';
 
 // Fetch available weeks
 export const fetchAvailableWeeks = createAsyncThunk(
@@ -60,6 +61,20 @@ export const approveSchedulesInDB = createAsyncThunk(
         status,
       });
       return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const deleteScheduleByWeek = createAsyncThunk(
+  "schedule/deleteScheduleByWeek",
+  async ({ branchId, weekStartDate }, { rejectWithValue }) => {
+    try {
+      await API.delete(`/schedules/delete-by-week/`, {
+        params: { branch_id: branchId, week_start_date: weekStartDate },
+      });
+      return weekStartDate; // Возвращаем дату удаленной недели
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -134,6 +149,15 @@ const scheduleSlice = createSlice({
       .addCase(approveSchedulesInDB.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(deleteScheduleByWeek.fulfilled, (state, action) => {
+        state.schedules = state.schedules.filter(schedule => schedule.week_start_date !== action.payload);
+        state.availableWeeks = state.availableWeeks.filter(week => week !== action.payload);
+        toast.success("Schedule for the week deleted successfully!");
+      })
+      .addCase(deleteScheduleByWeek.rejected, (state, action) => {
+        state.error = action.payload;
+        toast.error("Failed to delete schedule for the week.");
       });
   },
 });

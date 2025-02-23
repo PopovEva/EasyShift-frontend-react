@@ -4,8 +4,10 @@ import {
   fetchAvailableWeeks,
   fetchSchedules,
   setSelectedWeek,
+  deleteScheduleByWeek
 } from "../../slices/scheduleSlice";
 import { toast } from "react-toastify";
+import "../../toastStyles.css";
 import API from "../../api/axios";
 
 const AdminScheduleManagement = ({ branchId }) => {
@@ -161,6 +163,53 @@ const AdminScheduleManagement = ({ branchId }) => {
     }
   };
 
+  const deleteScheduleForWeek = async () => {
+    const confirm = await new Promise((resolve) => {
+      toast(
+        ({ closeToast }) => (
+          <div>
+            <p>Are you sure you want to delete the schedule for this week?</p>
+            <div className="d-flex justify-content-center gap-2">
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => resolve(true)}
+              >
+                🗑 Yes, delete
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  closeToast();
+                  resolve(false);
+                }}
+              >
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
+        ),
+        {
+          autoClose: false,
+          closeOnClick: false,
+          closeButton: false,
+          toastId: "confirm-delete",
+          className: "toast-warning", // Apply warning styles
+        }
+      );
+    });
+  
+    if (!confirm) return;
+  
+    try {
+      await dispatch(deleteScheduleByWeek({ branchId, weekStartDate: selectedWeek })).unwrap();
+      dispatch(setSelectedWeek("")); // Reset week selection after deletion
+      toast.success("Weekly schedule successfully deleted!", { className: "toast-success" });
+    } catch (error) {
+      console.error("Error deleting schedule:", error);
+      toast.error("Failed to delete the schedule!", { className: "toast-error" });
+    }
+  };
+
   // Генерация дат недели
   const getWeekDates = (startDate) => {
     const start = new Date(startDate);
@@ -295,6 +344,9 @@ const AdminScheduleManagement = ({ branchId }) => {
             ))}
           </tbody>
         </table>
+        <button className="btn btn-danger mt-3" onClick={deleteScheduleForWeek}>
+          🗑 Delete Weekly Schedule
+        </button>
         <button className="btn btn-success mt-3" onClick={approveSchedule}>
           Approve Schedule
         </button>

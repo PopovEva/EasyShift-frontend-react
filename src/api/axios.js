@@ -31,24 +31,41 @@ API.interceptors.response.use(
     // Если токен истек и есть refresh-токен
     if (error.response) {
       // Обработка ошибки 401 (Unauthorized)
-      if (error.response.status === 401 && !originalRequest._retry && refreshToken) {
+      if (error.response.status === 401) {
+        if (!refreshToken) {
+            // Если refresh-токена нет, разлогиниваем пользователя
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/';
+            toast.error('Сессия истекла. Пожалуйста, войдите снова.');
+            return Promise.reject(error);
+        }
+    
+        if (originalRequest._retry) {
+            // Если запрос уже был повторён, прекращаем бесконечный цикл
+            return Promise.reject(error);
+        }
+    
         originalRequest._retry = true;
-      try {
-        // Обновляем access-токен
-        const response = await axios.post('http://localhost:8000/api/token/refresh/', {
-          refresh: refreshToken,
-        });
-        localStorage.setItem('access_token', response.data.access); // Сохраняем новый access-токен
-        originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
-        return API(originalRequest); // Повторяем исходный запрос с новым токеном
-      } catch (refreshError) {
-        localStorage.removeItem('access_token'); // Удаляем старые токены
-        localStorage.removeItem('refresh_token');
-        window.location.href = '/'; // Перенаправляем на страницу логина
-        toast.error('Сессия истекла. Пожалуйста, войдите снова.');
-        return Promise.reject(refreshError);
+    
+        try {
+            const response = await axios.post('http://localhost:8000/api/token/refresh/', {
+                refresh: refreshToken,
+            });
+    
+            localStorage.setItem('access_token', response.data.access);
+            originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
+    
+            return API(originalRequest);
+        } catch (refreshError) {
+            // Очистка токенов и разлогинивание при ошибке обновления
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/';
+            toast.error('Сессия истекла. Пожалуйста, войдите снова.');
+            return Promise.reject(refreshError);
+        }
       }
-    }
     // Обработка других ошибок
     if (error.response.status === 403) {
       toast.error('Доступ запрещен!');

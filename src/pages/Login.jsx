@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { setUser, setTokens } from '../slices/userSlice';
 import 'react-toastify/dist/ReactToastify.css';
+import API from '../api/axios';
 
 const Login = () => {
     const  navigate = useNavigate();
@@ -16,10 +16,8 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try{
-            const response = await axios.post('http://localhost:8000/api/token/',{
-                username,
-                password,
-            });
+          const response = await API.post('/token/', { username, password });
+
 
             // Сохраняем токены в Redux и localStorage
             dispatch(setTokens({ access: response.data.access, refresh: response.data.refresh }));
@@ -30,12 +28,7 @@ const Login = () => {
             toast.success('Login successful!');
 
             //geting user info
-            const userInfo = await axios.get('http://localhost:8000/api/user-info/', {
-                headers:{
-                    Authorization: `Bearer ${response.data.access}`,
-                },
-            });
-
+            const userInfo = await API.get('/user-info/');
             dispatch(setUser(userInfo.data)); // Сохраняем данные пользователя в Redux
 
             //chek groop
@@ -44,7 +37,6 @@ const Login = () => {
             } else if (userInfo.data.group === 'Worker') {
                 navigate('/worker-profile');
             } else {
-                setError('User group not recognized');
                 toast.error('User group not recognized');
             }
         } catch (err){

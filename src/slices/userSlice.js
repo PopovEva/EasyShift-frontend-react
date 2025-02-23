@@ -3,8 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   user: null,
   tokens: {
-    access: null,
-    refresh: null,
+    access: localStorage.getItem('access_token') || null,
+    refresh: localStorage.getItem('refresh_token') || null,
   },
 };
 
