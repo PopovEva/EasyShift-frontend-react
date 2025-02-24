@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
 import API from "../api/axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -105,7 +104,6 @@ const AdminProfile = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="d-flex vh-100">
         {/* Панель управления */}
         <div className="bg-light p-3" style={{ width: "20%" }}>

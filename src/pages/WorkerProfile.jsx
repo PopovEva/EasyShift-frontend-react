@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import WorkerProfileData from './WorkerOptions/WorkerProfileData';
 import WeeklySchedule from './WorkerOptions/WeeklySchedule';
 import SubmitShifts from './WorkerOptions/SubmitShifts';
@@ -72,7 +71,6 @@ const WorkerProfile = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="d-flex vh-100">
         {/* Sidebar */}
         <div className="bg-light p-3" style={{ width: '20%' }}>

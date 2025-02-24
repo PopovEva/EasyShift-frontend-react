@@ -4,6 +4,8 @@ import { setUser } from './slices/userSlice';
 import API from './api/axios';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Login from './pages/Login';
 import WorkerProfile from './pages/WorkerProfile';
 import AdminProfile from './pages/AdminProfile';
@@ -38,24 +40,16 @@ const App = () => {
 
   return(
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-      <div>
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
+      <Navbar />
+      <div className="content">
         <Routes>
-          <Route path="/" element={<Login />}/>
-          <Route path="/worker-profile" element={<PrivateRoute><WorkerProfile/></PrivateRoute>}/>
-          <Route path="/admin-profile" element={<PrivateRoute><AdminProfile/></PrivateRoute>}/>
+          <Route path="/" element={<Login />} />
+          <Route path="/worker-profile" element={<PrivateRoute><WorkerProfile/></PrivateRoute>} />
+          <Route path="/admin-profile" element={<PrivateRoute><AdminProfile/></PrivateRoute>} />
         </Routes>
       </div>
+      <Footer />
     </>
   );
 };
