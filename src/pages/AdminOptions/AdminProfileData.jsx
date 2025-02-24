@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../slices/userSlice";
 import API from "../../api/axios";
 import { toast } from "react-toastify";
-import { Spinner } from "react-bootstrap"; // Добавляем Bootstrap-спиннер
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Иконки FontAwesome
+import { faUser, faEnvelope, faPhone, faKey, faBuilding, faStickyNote } from "@fortawesome/free-solid-svg-icons";
 
 const AdminProfileData = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user); // Получаем данные пользователя из Redux
+  const user = useSelector((state) => state.user.user);
 
   const [profileData, setProfileData] = useState({
     username: "",
@@ -19,10 +20,12 @@ const AdminProfileData = () => {
     notes: "",
     password: "",
   });
+
   const [branchName, setBranchName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [highlight, setHighlight] = useState(false); // Анимация при успешном обновлении
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -61,16 +64,20 @@ const AdminProfileData = () => {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     try {
+      setSaving(true);
       const updateData = { ...profileData };
       if (!updateData.password) {
-        delete updateData.password; // Удаляем пароль, если он не изменялся
+        delete updateData.password;
       }
 
       const response = await API.put("/update-user/", updateData);
-      dispatch(setUser(response.data.user)); // Обновляем Redux state
+      dispatch(setUser(response.data.user));
       toast.success("Profile updated successfully!");
+
+      // Анимация успешного сохранения
+      setHighlight(true);
+      setTimeout(() => setHighlight(false), 2000);
     } catch (err) {
       toast.error("Failed to update profile");
     } finally {
@@ -88,44 +95,77 @@ const AdminProfileData = () => {
 
   return (
     <div className="container mt-4">
-      <div className="card shadow-lg p-4">
+      <div className={`card shadow-lg p-4 ${highlight ? "highlight" : ""}`}>
         <h2 className="text-center mb-4">🛠 Admin Profile</h2>
         <div className="row">
+          {/* First Name */}
           <div className="col-md-6 mb-3">
-            <label className="form-label">Username (cannot be changed)</label>
-            <input type="text" className="form-control" value={profileData.username} disabled />
+            <div className="form-floating">
+              <input type="text" className="form-control" name="first_name" value={profileData.first_name} onChange={handleChange} />
+              <label><FontAwesomeIcon icon={faUser} /> First Name</label>
+            </div>
           </div>
+
+          {/* Last Name */}
           <div className="col-md-6 mb-3">
-            <label className="form-label">First Name</label>
-            <input type="text" className="form-control" name="first_name" value={profileData.first_name} onChange={handleChange} />
+            <div className="form-floating">
+              <input type="text" className="form-control" name="last_name" value={profileData.last_name} onChange={handleChange} />
+              <label><FontAwesomeIcon icon={faUser} /> Last Name</label>
+            </div>
           </div>
+
+          {/* Email */}
           <div className="col-md-6 mb-3">
-            <label className="form-label">Email</label>
-            <input type="email" className="form-control" name="email" value={profileData.email} onChange={handleChange} />
+            <div className="form-floating">
+              <input type="email" className="form-control" name="email" value={profileData.email} onChange={handleChange} />
+              <label><FontAwesomeIcon icon={faEnvelope} /> Email</label>
+            </div>
           </div>
+
+          {/* Phone Number */}
           <div className="col-md-6 mb-3">
-            <label className="form-label">Last Name</label>
-            <input type="text" className="form-control" name="last_name" value={profileData.last_name} onChange={handleChange} />
+            <div className="form-floating">
+              <input type="text" className="form-control" name="phone_number" value={profileData.phone_number} onChange={handleChange} />
+              <label><FontAwesomeIcon icon={faPhone} /> Phone Number</label>
+            </div>
           </div>
+
+          {/* Branch */}
           <div className="col-md-6 mb-3">
-            <label className="form-label">Phone Number</label>
-            <input type="text" className="form-control" name="phone_number" value={profileData.phone_number} onChange={handleChange} />
+            <div className="form-floating">
+              <input type="text" className="form-control" value={branchName} disabled />
+              <label><FontAwesomeIcon icon={faBuilding} /> Branch</label>
+            </div>
           </div>
+
+          {/* Notes */}
+          <div className="col-md-12 mb-3">
+            <div className="form-floating">
+              <textarea className="form-control" name="notes" value={profileData.notes} onChange={handleChange} />
+              <label><FontAwesomeIcon icon={faStickyNote} /> Notes</label>
+            </div>
+          </div>
+
+          {/* User Name */}
           <div className="col-md-6 mb-3">
-            <label className="form-label">Branch</label>
-            <input type="text" className="form-control" value={branchName} disabled />
+            <div className="form-floating">
+              <input type="text" className="form-control" value={profileData.username} disabled />
+              <label><FontAwesomeIcon icon={faUser} /> Username (cannot be changed)</label>
+            </div>
           </div>
-          <div className="col-12 mb-3">
-            <label className="form-label">Notes</label>
-            <textarea className="form-control" name="notes" value={profileData.notes} onChange={handleChange} />
-          </div>
-          <div className="col-12 mb-3">
-            <label className="form-label">New Password (leave blank to keep unchanged)</label>
-            <input type="password" className="form-control" name="password" value={profileData.password} onChange={handleChange} />
+
+          {/* Password */}
+          <div className="col-md-12 mb-3">
+            <div className="form-floating">
+            <input type="password" className="form-control" name="password" value={profileData.password} onChange={handleChange} placeholder="Leave blank to keep current password" />
+              <label><FontAwesomeIcon icon={faKey} /> New Password (leave blank to keep unchanged)</label>
+            </div>
           </div>
         </div>
+
+        {/* Save Button */}
         <button className="btn btn-primary w-100" onClick={handleSave} disabled={saving}>
-          {saving ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : "Save Changes"}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>

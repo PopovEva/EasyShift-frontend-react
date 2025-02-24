@@ -86,7 +86,7 @@ const WorkerProfile = () => {
                   setActiveOption("profile");
                 }}
                 >
-                נתוני פרופיל
+                Profile Data
               </button>
             </li>
             <li className="nav-item mb-2">
@@ -95,7 +95,7 @@ const WorkerProfile = () => {
                 sessionStorage.setItem("worker_active_tab", "schedule");
                 setActiveOption("schedule");
               }}>
-              לוח זמנים שבועי
+                Weekly Schedule
               </button>
             </li>
             <li className="nav-item mb-2">
@@ -104,8 +104,7 @@ const WorkerProfile = () => {
                 sessionStorage.setItem("worker_active_tab", "submit-shifts");
                 setActiveOption("submit-shifts");
               }}>
-              הגשת משמרות
-              </button>
+                Submitting shifts              </button>
             </li>
             <li className="nav-item mb-2">
               <button className="btn btn-outline-warning w-100"
@@ -113,7 +112,7 @@ const WorkerProfile = () => {
                 sessionStorage.setItem("worker_active_tab", "notifications");
                 setActiveOption("notifications");
               }}>
-                📢 הודעות
+                📢 Notifications
               </button>
             </li>
           </ul>
