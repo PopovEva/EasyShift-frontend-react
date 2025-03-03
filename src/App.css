@@ -13,11 +13,11 @@ body {
 }
 
 .navbar {
-  background-color: rgba(33, 37, 41, 0.85) !important;
+  background-color: rgba(19, 37, 54, 0.85) !important;
   padding: 10px 20px;
 }
 .custom-navbar {
-  background-color: rgba(33, 37, 41, 0.85) !important; /* Темно-серый с прозрачностью */
+  background-color: rgba(14, 46, 77, 0.85) !important; /* Темно-серый с прозрачностью */
   padding: 10px 20px;
   /* transition: background-color 0.3s ease-in-out; */
 }
@@ -42,7 +42,7 @@ body {
 }
 
 .footer {
-  background-color: rgba(33, 37, 41, 0.85); /* Темный с прозрачностью */
+  background-color: rgba(14, 46, 77, 0.85); /* Темный с прозрачностью */
   color: white;
   text-align: center;
   padding: 20px 0;
