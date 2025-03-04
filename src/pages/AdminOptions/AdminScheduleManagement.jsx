@@ -172,7 +172,10 @@ const AdminScheduleManagement = ({ branchId }) => {
             <div className="d-flex justify-content-center gap-2">
               <button
                 className="btn btn-danger btn-sm"
-                onClick={() => resolve(true)}
+                onClick={() => {
+                  closeToast();
+                  resolve(true);
+                }}
               >
                 🗑 Yes, delete
               </button>

@@ -13,6 +13,8 @@ import Spinner from "react-bootstrap/Spinner";
  * - handleSave: Function to handle saving the changes.
  * - handleClose: Function to close the modal.
  * - saving: Boolean indicating if the save operation is in progress.
+ * - handleDelete: Function to handle deletion of the employee.
+ * - formErrors: Object containing inline error messages for form fields.
  */
 const EmployeeEditModal = ({
   show,
@@ -21,6 +23,8 @@ const EmployeeEditModal = ({
   handleSave,
   handleClose,
   saving,
+  handleDelete,
+  formErrors,
 }) => {
   return (
     <Modal show={show} onHide={handleClose}>
@@ -39,6 +43,9 @@ const EmployeeEditModal = ({
               value={editingEmployee.user.username || ""}
               onChange={handleChange}
             />
+            {formErrors.username && (
+              <small className="text-danger">{formErrors.username.join(", ")}</small>
+            )}
             {/* First Name Field */}
             <label>First Name</label>
             <input
@@ -48,6 +55,9 @@ const EmployeeEditModal = ({
               value={editingEmployee.user.first_name || ""}
               onChange={handleChange}
             />
+            {formErrors.first_name && (
+              <small className="text-danger">{formErrors.first_name.join(", ")}</small>
+            )}
             {/* Last Name Field */}
             <label>Last Name</label>
             <input
@@ -57,6 +67,9 @@ const EmployeeEditModal = ({
               value={editingEmployee.user.last_name || ""}
               onChange={handleChange}
             />
+            {formErrors.last_name && (
+              <small className="text-danger">{formErrors.last_name.join(", ")}</small>
+            )}
             {/* Email Field */}
             <label>Email</label>
             <input
@@ -66,6 +79,9 @@ const EmployeeEditModal = ({
               value={editingEmployee.user.email || ""}
               onChange={handleChange}
             />
+            {formErrors.email && (
+              <small className="text-danger">{formErrors.email.join(", ")}</small>
+            )}
             {/* Phone Number Field */}
             <label>Phone</label>
             <input
@@ -75,6 +91,9 @@ const EmployeeEditModal = ({
               value={editingEmployee.phone_number || ""}
               onChange={handleChange}
             />
+            {formErrors.phone_number && (
+              <small className="text-danger">{formErrors.phone_number.join(", ")}</small>
+            )}
             {/* Branch Field (disabled) */}
             <label>Branch (disabled)</label>
             <input
@@ -91,6 +110,9 @@ const EmployeeEditModal = ({
               value={editingEmployee.notes || ""}
               onChange={handleChange}
             />
+            {formErrors.notes && (
+              <small className="text-danger">{formErrors.notes.join(", ")}</small>
+            )}
             {/* New Password Field */}
             <label>New Password</label>
             <input
@@ -101,12 +123,26 @@ const EmployeeEditModal = ({
               onChange={handleChange}
               placeholder="Leave blank to keep current password"
             />
+            {formErrors.password && (
+              <small className="text-danger">{formErrors.password.join(", ")}</small>
+            )}
           </div>
         )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
           Close
+        </Button>
+        {/* Delete Button */}
+        <Button variant="danger" onClick={handleDelete} disabled={saving}>
+          {saving ? (
+            <>
+              <Spinner animation="border" size="sm" role="status" className="me-2" />
+              Deleting...
+            </>
+          ) : (
+            "Delete Employee"
+          )}
         </Button>
         <Button variant="primary" onClick={handleSave} disabled={saving}>
           {saving ? (

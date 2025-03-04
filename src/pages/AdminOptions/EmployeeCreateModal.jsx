@@ -13,6 +13,9 @@ import Spinner from "react-bootstrap/Spinner";
  * - handleCreate: Function to handle the creation action.
  * - handleClose: Function to close the modal.
  * - saving: Boolean indicating if the creation operation is in progress.
+ * - formErrors: Object containing inline error messages for form fields.
+ * - branches: Array of branch objects for selection.
+ * - adminBranchName: String containing the current admin's branch name.
  */
 const EmployeeCreateModal = ({
   show,
@@ -21,6 +24,9 @@ const EmployeeCreateModal = ({
   handleCreate,
   handleClose,
   saving,
+  formErrors,
+  branches,
+  adminBranchName,
 }) => {
   return (
     <Modal show={show} onHide={handleClose}>
@@ -39,6 +45,9 @@ const EmployeeCreateModal = ({
               value={newEmployee.username || ""}
               onChange={handleChange}
             />
+            {formErrors.username && (
+              <small className="text-danger">{formErrors.username.join(", ")}</small>
+            )}
             {/* First Name Field */}
             <label>First Name</label>
             <input
@@ -48,6 +57,9 @@ const EmployeeCreateModal = ({
               value={newEmployee.first_name || ""}
               onChange={handleChange}
             />
+            {formErrors.first_name && (
+              <small className="text-danger">{formErrors.first_name.join(", ")}</small>
+            )}
             {/* Last Name Field */}
             <label>Last Name</label>
             <input
@@ -57,6 +69,9 @@ const EmployeeCreateModal = ({
               value={newEmployee.last_name || ""}
               onChange={handleChange}
             />
+            {formErrors.last_name && (
+              <small className="text-danger">{formErrors.last_name.join(", ")}</small>
+            )}
             {/* Email Field */}
             <label>Email</label>
             <input
@@ -66,6 +81,9 @@ const EmployeeCreateModal = ({
               value={newEmployee.email || ""}
               onChange={handleChange}
             />
+            {formErrors.email && (
+              <small className="text-danger">{formErrors.email.join(", ")}</small>
+            )}
             {/* Phone Number Field */}
             <label>Phone</label>
             <input
@@ -75,6 +93,9 @@ const EmployeeCreateModal = ({
               value={newEmployee.phone_number || ""}
               onChange={handleChange}
             />
+            {formErrors.phone_number && (
+              <small className="text-danger">{formErrors.phone_number.join(", ")}</small>
+            )}
             {/* Notes Field */}
             <label>Notes</label>
             <textarea
@@ -83,6 +104,9 @@ const EmployeeCreateModal = ({
               value={newEmployee.notes || ""}
               onChange={handleChange}
             />
+            {formErrors.notes && (
+              <small className="text-danger">{formErrors.notes.join(", ")}</small>
+            )}
             {/* Password Field */}
             <label>Password</label>
             <input
@@ -93,6 +117,9 @@ const EmployeeCreateModal = ({
               onChange={handleChange}
               placeholder="Enter password"
             />
+            {formErrors.password && (
+              <small className="text-danger">{formErrors.password.join(", ")}</small>
+            )}
             {/* Group Field */}
             <label>Group</label>
             <select
@@ -104,6 +131,29 @@ const EmployeeCreateModal = ({
               <option value="Worker">Worker</option>
               <option value="Admin">Admin</option>
             </select>
+            {formErrors.group && (
+              <small className="text-danger">{formErrors.group.join(", ")}</small>
+            )}
+            {/* Branch Selection Field */}
+            <label>
+              Branch (your branch – {adminBranchName || "Not set"})
+            </label>
+            <select
+              className="form-control"
+              name="branch"
+              value={newEmployee.branch}
+              onChange={handleChange}
+            >
+              <option value="">Select Branch</option>
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+            {formErrors.branch && (
+              <small className="text-danger">{formErrors.branch.join(", ")}</small>
+            )}
           </div>
         )}
       </Modal.Body>

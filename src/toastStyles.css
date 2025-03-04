@@ -9,7 +9,7 @@
   
 /* Styles for warning messages */
 .toast-warning {
-    background-color: #ee9fa7 !important; /* Red background */
+    background-color: #f04657bd !important; /* Red background */
     color: white !important; /* Ensures white text */
 }
   

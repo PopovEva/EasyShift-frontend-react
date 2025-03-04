@@ -135,17 +135,6 @@ const AdminProfile = () => {
               <button
                 className="btn btn-outline-primary w-100"
                 onClick={() => {
-                  sessionStorage.setItem("admin_active_tab", "schedule");
-                  setActiveOption("schedule");
-                }}
-              >
-                Create Schedule
-              </button>
-            </li>
-            <li className="nav-item mb-2">
-              <button
-                className="btn btn-outline-primary w-100"
-                onClick={() => {
                   sessionStorage.setItem("admin_active_tab", "rooms");
                   setActiveOption("rooms");
                 }}
@@ -162,6 +151,17 @@ const AdminProfile = () => {
                 }}
               >
                 Branches
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "schedule");
+                  setActiveOption("schedule");
+                }}
+              >
+                Create Schedule
               </button>
             </li>
             <li className="nav-item mb-2">
