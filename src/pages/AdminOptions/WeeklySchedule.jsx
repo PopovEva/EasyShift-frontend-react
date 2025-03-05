@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import API from "../../api/axios";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "../WeeklySchedule/WeeklySchedule.css";
 
 const WeeklySchedule = () => {
-  const { user } = useSelector((state) => state.user); // Получаем данные пользователя из Redux
+  const { user } = useSelector((state) => state.user);
   const branchId = user?.branch;
 
   const [schedules, setSchedules] = useState([]);
@@ -11,7 +14,34 @@ const WeeklySchedule = () => {
   const [selectedWeek, setSelectedWeek] = useState("");
   const [availableWeeks, setAvailableWeeks] = useState([]);
 
-  // Получение доступных недель
+  // Helper: get week start date (Sunday)
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    d.setDate(d.getDate() - day);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  // Helper: format date to "YYYY-MM-DD"
+  const formatDateToYMD = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper: format week range as "DD.MM - DD.MM"
+  const formatWeekRange = (weekStartStr) => {
+    const start = new Date(weekStartStr);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const formatDate = (date) =>
+      `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}`;
+    return `${formatDate(start)} - ${formatDate(end)}`;
+  };
+
+  // Fetch available weeks
   useEffect(() => {
     if (!branchId) {
       setError("Branch ID is missing. Please check user data.");
@@ -21,16 +51,19 @@ const WeeklySchedule = () => {
     const fetchAvailableWeeks = async () => {
       try {
         const response = await API.get(`/available-weeks/${branchId}`, {
-          params: { status: "approved" }, // Добавляем параметр статуса
+          params: { status: "approved" },
         });
-        const approvedWeeks = response.data;
-
+        let approvedWeeks = response.data; // array of week start strings in "YYYY-MM-DD" format
         if (approvedWeeks.length > 0) {
+          approvedWeeks.sort((a, b) => new Date(a) - new Date(b));
+          const today = new Date();
+          const weeksBeforeToday = approvedWeeks.filter((week) => new Date(week) <= today);
+          const defaultWeek = weeksBeforeToday.length > 0 ? weeksBeforeToday[weeksBeforeToday.length - 1] : approvedWeeks[0];
           setAvailableWeeks(approvedWeeks);
-          setSelectedWeek(approvedWeeks[0]); // Устанавливаем первую доступную неделю
+          setSelectedWeek(defaultWeek);
         } else {
           setAvailableWeeks([]);
-          setSelectedWeek(""); // Если нет недель, сбрасываем выбор
+          setSelectedWeek("");
           setError("No published schedules are available at the moment.");
         }
       } catch (error) {
@@ -42,7 +75,7 @@ const WeeklySchedule = () => {
     fetchAvailableWeeks();
   }, [branchId]);
 
-  // Загрузка расписаний
+  // Fetch schedules when selectedWeek changes
   useEffect(() => {
     if (!selectedWeek || !branchId) return;
 
@@ -63,131 +96,143 @@ const WeeklySchedule = () => {
     fetchSchedules();
   }, [branchId, selectedWeek]);
 
+  // Render schedule table
   const renderScheduleTable = () => {
-  const daysOfWeek = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-  const shifts = [...new Set(schedules.map((s) => s.shift_details.shift_type))];
-  const rooms = [...new Set(schedules.map((s) => s.shift_details.room))];
+    const daysOfWeek = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    const shifts = [...new Set(schedules.map((s) => s.shift_details.shift_type))];
+    const rooms = [...new Set(schedules.map((s) => s.shift_details.room))];
 
-  // Функция для генерации дат недели
-  const generateWeekDates = (startDate) => {
-    const start = new Date(startDate);
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
-      dates.push(`${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}`);
-    }
-    return dates;
-  };
+    // Function to generate week dates (DD.MM format)
+    const generateWeekDates = (weekStartStr) => {
+      const start = new Date(weekStartStr);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(start);
+        date.setDate(start.getDate() + i);
+        dates.push(`${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}`);
+      }
+      return dates;
+    };
 
-  const weekDates = generateWeekDates(selectedWeek);
+    const weekDates = generateWeekDates(selectedWeek);
 
-  return (
-    <div style={{ direction: "rtl" }}>
-      <table className="table table-bordered table-striped text-center">
-        <thead>
-          {/* Линия с датами */}
-          <tr>
-            <th></th>
-            <th></th>
-            {weekDates.map((date, index) => (
-              <th key={`date-${index}`}>{date}</th>
-            ))}
-          </tr>
-          {/* Линия с днями недели */}
-          <tr>
-            <th>משמרת</th>
-            <th>חדר</th>
-            {daysOfWeek.map((day, index) => (
-              <th key={`day-${index}`}>{day}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {shifts.map((shift) => (
-            <React.Fragment key={shift}>
-              {rooms.map((room, roomIndex) => (
-                <tr key={`${shift}-${room}`}>
-                  {roomIndex === 0 && (
-                    <td rowSpan={rooms.length} className="align-middle">{shift}</td>
-                  )}
-                  <td className="align-middle">{room}</td>
-                  {daysOfWeek.map((day) => {
-                    // Находим расписание для текущего дня, смены и комнаты
-                    const currentSchedule = schedules.find(
-                      (s) =>
-                        s.day === day &&
-                        s.shift_details.shift_type === shift &&
-                        s.shift_details.room === room &&
-                        s.week_start_date === selectedWeek // Убедимся, что неделя совпадает
-                    );
-                    
-                    // // Логируем данные, чтобы убедиться, что они корректно находятся
-                    // console.log(
-                    //   `Day: ${day}, Shift: ${shift}, Room: ${room}, Schedule:`,
-                    //   currentSchedule
-                    // );
+    // Define two arrays of colors for alternating rows by shift and room.
+    const rowColors = [
+      ["#b3e5fc", "#81d4fa"], // For even shift groups
+      ["#fff9c4", "#fff59d"], // For odd shift groups
+    ];
 
-                    return (
-                      <td key={`${day}-${shift}-${room}`} className="align-middle">
-                        {currentSchedule?.employee_name || "Not assigned"}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-  // const getDateForDay = (dayIndex) => {
-  //   if (!selectedWeek) return "";
-  //   const startDate = new Date(selectedWeek);
-  //   startDate.setDate(startDate.getDate() + dayIndex);
-  //   return startDate.toLocaleDateString("he-IL", {
-  //     day: "2-digit",
-  //     month: "2-digit",
-  //   });
-  // };
-
-  if (!branchId) {
-    return <p className="text-danger">Branch ID is missing. Please check user data.</p>;
-  }
-
-  if (!availableWeeks.length) {
     return (
-      <div>
-        <h2>Weekly Schedule</h2>
-        <p className="text-danger">No published schedules are available at the moment.</p>
+      <div className="card mt-3" dir="rtl">
+        <div className="card-header text-center" style={{ backgroundColor: "lightblue" }}>
+          תצוגה מקדימה
+        </div>
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-bordered text-center">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  {weekDates.map((date, index) => (
+                    <th key={`date-${index}`}>{date}</th>
+                  ))}
+                </tr>
+                <tr>
+                  <th>משמרת</th>
+                  <th>חדר</th>
+                  {daysOfWeek.map((day, index) => (
+                    <th key={`day-${index}`}>{day}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {shifts.map((shift, shiftIndex) => (
+                  <React.Fragment key={shift}>
+                    {rooms.map((room, roomIndex) => {
+                      // Определяем класс строки на основе индексов shiftIndex и roomIndex
+                      const rowClass =
+                        shiftIndex % 2 === 0
+                          ? roomIndex % 2 === 0
+                            ? "custom-row-even-room-even"
+                            : "custom-row-even-room-odd"
+                          : roomIndex % 2 === 0
+                          ? "custom-row-odd-room-even"
+                          : "custom-row-odd-room-odd";
+
+                      return (
+                        <tr key={`${shift}-${room}`} className={rowClass}>
+                          {roomIndex === 0 && (
+                            <td rowSpan={rooms.length} className="align-middle">
+                              {shift}
+                            </td>
+                          )}
+                          <td className="align-middle">{room}</td>
+                          {daysOfWeek.map((day) => {
+                            const currentSchedule = schedules.find(
+                              (s) =>
+                                s.day === day &&
+                                s.shift_details.shift_type === shift &&
+                                s.shift_details.room === room &&
+                                s.week_start_date === selectedWeek
+                            );
+                            return (
+                              <td key={`${day}-${shift}-${room}`} className="align-middle">
+                                {currentSchedule?.employee_name || "לא הוקצה"}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
-  }
+  };
 
-  if (error) {
-    return <p className="text-danger">{error}</p>;
-  }
+  // Convert selectedWeek to Date object for DatePicker
+  const selectedWeekDate = selectedWeek ? new Date(selectedWeek) : null;
 
   return (
-    <div>
-      <h2>Weekly Schedule</h2>
-      <label htmlFor="week-select">Select Week:</label>
-      <select
-        id="week-select"
-        value={selectedWeek}
-        onChange={(e) => setSelectedWeek(e.target.value)}
-      >
-        {availableWeeks.map((week) => (
-          <option key={week} value={week}>
-            {week}
-          </option>
-        ))}
-      </select>
-
+    <div className="container mt-4">
+      <h2 className="mb-4">Weekly Schedule</h2>
+      <div className="mb-3">
+        <label className="form-label">Select week:</label>
+        <ReactDatePicker
+          selected={selectedWeekDate}
+          onChange={(date) => {
+            const weekStart = getWeekStart(date);
+            const formattedWeek = formatDateToYMD(weekStart);
+            setSelectedWeek(formattedWeek);
+          }}
+          dateFormat="dd.MM.yyyy"
+          placeholderText="Select week"
+          calendarStartDay={0} // Week starts on Sunday
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode="select"
+          filterDate={(date) => {
+            // Allow only dates corresponding to available weeks
+            const weekStart = formatDateToYMD(getWeekStart(date));
+            return availableWeeks.includes(weekStart);
+          }}
+          customInput={
+            <input
+              type="text"
+              className="form-control"
+              readOnly
+              value={selectedWeek ? formatWeekRange(selectedWeek) : ""}
+            />
+          }
+        />
+      </div>
       {renderScheduleTable()}
+      {error && <p className="text-danger">{error}</p>}
     </div>
   );
 };

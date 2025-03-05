@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../slices/userSlice";
 import API from "../../api/axios";
 import { toast } from "react-toastify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Иконки FontAwesome
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserShield } from "@fortawesome/free-solid-svg-icons";
 import { faUser, faEnvelope, faPhone, faKey, faBuilding, faStickyNote } from "@fortawesome/free-solid-svg-icons";
 
 const AdminProfileData = () => {
@@ -96,7 +97,9 @@ const AdminProfileData = () => {
   return (
     <div className="container mt-4">
       <div className={`card shadow-lg p-4 ${highlight ? "highlight" : ""}`}>
-        <h2 className="text-center mb-4">🛠 Admin Profile</h2>
+      <h2 className="text-center mb-4">
+        <FontAwesomeIcon icon={faUserShield} /> Admin Profile
+      </h2>
         <div className="row">
           {/* First Name */}
           <div className="col-md-6 mb-3">

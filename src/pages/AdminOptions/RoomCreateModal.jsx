@@ -25,6 +25,7 @@ const RoomCreateModal = ({
   saving,
   formErrors,
   branches,
+  adminBranchName,
 }) => {
   return (
     <Modal show={show} onHide={handleClose}>
@@ -58,7 +59,9 @@ const RoomCreateModal = ({
               <small className="text-danger">{formErrors.description.join(", ")}</small>
             )}
             {/* Branch Selection Field */}
-            <label>Branch</label>
+            <label>
+                Branch {adminBranchName ? `(your branch - ${adminBranchName})` : "(Not set)"}
+            </label>
             <select
               className="form-control"
               name="branch"

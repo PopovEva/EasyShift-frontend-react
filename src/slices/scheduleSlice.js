@@ -106,7 +106,14 @@ const scheduleSlice = createSlice({
         state.loading = false;
         state.availableWeeks = action.payload;
         if (action.payload.length > 0) {
-          state.selectedWeek = action.payload[0];
+          const sortedWeeks = [...action.payload].sort((a, b) => new Date(a) - new Date(b));
+          const today = new Date();
+          const weeksBeforeToday = sortedWeeks.filter((week) => new Date(week) <= today);
+          const defaultWeek =
+            weeksBeforeToday.length > 0
+              ? weeksBeforeToday[weeksBeforeToday.length - 1]
+              : sortedWeeks[0];
+          state.selectedWeek = defaultWeek;
         }
       })
       .addCase(fetchAvailableWeeks.rejected, (state, action) => {

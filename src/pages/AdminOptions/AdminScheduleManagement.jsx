@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAvailableWeeks,
-  fetchSchedules,
-  setSelectedWeek,
-  deleteScheduleByWeek
+  deleteScheduleByWeek,
+  setSelectedWeek
 } from "../../slices/scheduleSlice";
 import { toast } from "react-toastify";
 import "../../toastStyles.css";
 import API from "../../api/axios";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const AdminScheduleManagement = ({ branchId }) => {
   const dispatch = useDispatch();
@@ -16,83 +17,81 @@ const AdminScheduleManagement = ({ branchId }) => {
     (state) => state.schedule
   );
 
-  useEffect(() => {
-    console.log("Available weeks:", availableWeeks);
-    console.log("Selected week:", selectedWeek);
-  }, [availableWeeks, selectedWeek]);
-
   const [localSchedules, setLocalSchedules] = useState([]);
-  const [employees, setEmployees] = useState([]); // Список сотрудников филиала
+  const [employees, setEmployees] = useState([]);
 
-  // Получение доступных недель и сотрудников
+  // Helper: adjust date to Sunday (start of week)
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    d.setDate(d.getDate() - day);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  // Helper: format date as "YYYY-MM-DD"
+  const formatDateToYMD = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper: format week range as "DD.MM - DD.MM"
+  const formatWeekRange = (weekStartStr) => {
+    const start = new Date(weekStartStr);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const formatDate = (date) =>
+      `${String(date.getDate()).padStart(2, "0")}.${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+    return `${formatDate(start)} - ${formatDate(end)}`;
+  };
+
+  // Fetch available weeks and employees when branchId exists
   useEffect(() => {
     if (branchId) {
-      console.log("Branch ID:", branchId); // Логируем branchId для проверки
-      dispatch(fetchAvailableWeeks({ branchId, statuses: ["draft", "approved"] })); // Загружаем доступные недели
-      fetchEmployees(branchId); // Загружаем сотрудников филиала
+      dispatch(fetchAvailableWeeks({ branchId, statuses: ["draft", "approved"] }));
+      fetchEmployees(branchId);
     } else {
       console.error("Branch ID is missing. Please provide a valid branch ID.");
     }
-  }, [branchId]);
+  }, [branchId, dispatch]);
 
-  
-
-  // Загрузка сотрудников филиала
+  // Fetch branch employees
   const fetchEmployees = async (branchId) => {
     try {
       const response = await API.get(`/employees/?branch=${branchId}`);
-      setEmployees(response.data); // Устанавливаем список сотрудников
+      setEmployees(response.data);
     } catch (err) {
       console.error("Failed to fetch employees:", err);
       toast.error("Failed to fetch employees.");
     }
   };
 
-  useEffect(() => {
-    if (availableWeeks.length > 0 && !selectedWeek) {
-      const today = new Date();
-      const currentSunday = new Date(today);
-      currentSunday.setDate(today.getDate() - today.getDay()); // Ближайшее воскресенье
-  
-      // Найти ближайшую неделю
-      const closestWeek = availableWeeks.find(
-        (week) => new Date(week) >= currentSunday
-      );
-  
-      // Если ближайшая неделя не найдена, взять последнюю
-      const fallbackWeek = availableWeeks[availableWeeks.length - 1];
-      dispatch(setSelectedWeek(closestWeek || fallbackWeek));
-    }
-  }, [availableWeeks, selectedWeek, dispatch]);
-
-  // Загрузка расписания для выбранной недели
+  // Fetch schedules for the selected week
   useEffect(() => {
     const fetchSchedulesForWeek = async () => {
       if (!selectedWeek || !branchId) return;
-    
       try {
-        // Запросы для драфтовых и одобренных расписаний
         const [draftResponse, approvedResponse] = await Promise.all([
           API.get(`/get-schedule/${branchId}/draft`, { params: { week_start_date: selectedWeek } }),
-          API.get(`/get-schedule/${branchId}/approved`, { params: { week_start_date: selectedWeek } }),
+          API.get(`/get-schedule/${branchId}/approved`, { params: { week_start_date: selectedWeek } })
         ]);
-    
-        // Объединяем результаты
         const draftData = draftResponse.data || [];
         const approvedData = approvedResponse.data || [];
         const combinedSchedules = [...draftData, ...approvedData];
-    
-        // Привязываем сотрудников к расписаниям
+        // Attach employee names to schedules
         const schedulesWithEmployees = combinedSchedules.map((schedule) => {
           const employee = employees.find((emp) => emp.id === schedule.employee_id);
           return {
             ...schedule,
             employee_name: employee
               ? `${employee.user.first_name} ${employee.user.last_name}`
-              : "Not assigned",
+              : "Not assigned"
           };
         });
-    
         setLocalSchedules(schedulesWithEmployees);
       } catch (err) {
         console.error("Failed to fetch schedules:", err.response?.data || err.message);
@@ -100,11 +99,10 @@ const AdminScheduleManagement = ({ branchId }) => {
         setLocalSchedules([]);
       }
     };
-  
     fetchSchedulesForWeek();
-  }, [branchId, selectedWeek]);
+  }, [branchId, selectedWeek, employees]);
 
-  // Обновление сотрудника в локальном состоянии
+  // Update employee in local state when selection changes
   const updateEmployee = (day, shiftType, room, employeeId) => {
     const selectedEmployee = employees.find((emp) => emp.id === employeeId);
     setLocalSchedules((prevSchedules) =>
@@ -124,7 +122,7 @@ const AdminScheduleManagement = ({ branchId }) => {
     );
   };
 
-  // Сохранение изменений
+  // Save schedule changes
   const saveSchedule = async () => {
     try {
       await API.post(`/update-schedule/`, {
@@ -133,8 +131,8 @@ const AdminScheduleManagement = ({ branchId }) => {
           week_start_date: schedule.week_start_date,
           day: schedule.day,
           shift_details: schedule.shift_details,
-          employee_id: schedule.employee_id || null, // Здесь отправляем username сотрудника
-        })),
+          employee_id: schedule.employee_id || null
+        }))
       });
       toast.success("Schedule updated successfully!");
     } catch (err) {
@@ -143,7 +141,7 @@ const AdminScheduleManagement = ({ branchId }) => {
     }
   };
 
-  // Утверждение расписания
+  // Approve schedule
   const approveSchedule = async () => {
     try {
       await API.post(`/update-schedule/`, {
@@ -152,9 +150,9 @@ const AdminScheduleManagement = ({ branchId }) => {
           week_start_date: schedule.week_start_date,
           day: schedule.day,
           shift_details: schedule.shift_details,
-          employee_id: schedule.employee_id || null,
+          employee_id: schedule.employee_id || null
         })),
-        status: "approved",
+        status: "approved"
       });
       toast.success("Schedule approved successfully!");
     } catch (err) {
@@ -163,6 +161,7 @@ const AdminScheduleManagement = ({ branchId }) => {
     }
   };
 
+  // Delete schedule for the selected week
   const deleteScheduleForWeek = async () => {
     const confirm = await new Promise((resolve) => {
       toast(
@@ -196,16 +195,14 @@ const AdminScheduleManagement = ({ branchId }) => {
           closeOnClick: false,
           closeButton: false,
           toastId: "confirm-delete",
-          className: "toast-warning", // Apply warning styles
+          className: "toast-warning"
         }
       );
     });
-  
     if (!confirm) return;
-  
     try {
       await dispatch(deleteScheduleByWeek({ branchId, weekStartDate: selectedWeek })).unwrap();
-      dispatch(setSelectedWeek("")); // Reset week selection after deletion
+      dispatch(setSelectedWeek(""));
       toast.success("Weekly schedule successfully deleted!", { className: "toast-success" });
     } catch (error) {
       console.error("Error deleting schedule:", error);
@@ -213,7 +210,7 @@ const AdminScheduleManagement = ({ branchId }) => {
     }
   };
 
-  // Генерация дат недели
+  // Generate week dates for table display (format "DD/MM")
   const getWeekDates = (startDate) => {
     const start = new Date(startDate);
     const weekDates = [];
@@ -221,14 +218,15 @@ const AdminScheduleManagement = ({ branchId }) => {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
       weekDates.push(
-        `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}`
+        `${String(date.getDate()).padStart(2, "0")}/${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}`
       );
     }
     return weekDates;
   };
 
   if (loading) return <p>Loading schedules...</p>;
-
   if (!availableWeeks.length) {
     return (
       <div>
@@ -239,7 +237,6 @@ const AdminScheduleManagement = ({ branchId }) => {
       </div>
     );
   }
-
   if (!localSchedules.length) {
     return (
       <div>
@@ -251,109 +248,135 @@ const AdminScheduleManagement = ({ branchId }) => {
     );
   }
 
-  if (error) {
-    toast.error(error);
-    return <p className="text-danger">Error loading schedules</p>;
-  }
-
   const daysOfWeek = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
   const shifts = [...new Set(localSchedules.map((s) => s.shift_details.shift_type))];
   const rooms = [...new Set(localSchedules.map((s) => s.shift_details.room))];
   const uniqueDates = selectedWeek ? getWeekDates(selectedWeek) : [];
+  const selectedWeekDate = selectedWeek ? new Date(selectedWeek) : null;
 
   return (
-    <div>
+    <div className="container mt-4">
       <h2>Admin Schedule Management</h2>
-      <div>
-        <label htmlFor="week-select">Select Week:</label>
-        <select
-          id="week-select"
-          className="form-select"
-          value={selectedWeek || ""}
-          onChange={(e) => dispatch(setSelectedWeek(e.target.value))}
-        >
-          <option value="" disabled>
-            Select a week
-          </option>
-          {availableWeeks.map((week) => (
-            <option key={week} value={week}>
-              {week}
-            </option>
-          ))}
-        </select>
+      
+      {/* Week selection using ReactDatePicker */}
+      <div className="mb-3">
+        <label className="form-label">Select Week:</label>
+        <ReactDatePicker
+          selected={selectedWeekDate}
+          onChange={(date) => {
+            const weekStart = getWeekStart(date);
+            const formattedWeek = formatDateToYMD(weekStart);
+            dispatch(setSelectedWeek(formattedWeek));
+          }}
+          dateFormat="dd.MM.yyyy"
+          placeholderText="Select week"
+          calendarStartDay={0}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode="select"
+          filterDate={(date) => {
+            const weekStart = formatDateToYMD(getWeekStart(date));
+            return availableWeeks.includes(weekStart);
+          }}
+          customInput={
+            <input
+              type="text"
+              className="form-control"
+              readOnly
+              value={selectedWeek ? formatWeekRange(selectedWeek) : ""}
+            />
+          }
+        />
+      </div>
+      
+      <div className="card mt-3" dir="rtl">
+        <div className="card-header text-center" style={{ backgroundColor: "lightblue" }}>
+          תצוגה מקדימה
+        </div>
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-bordered table-striped text-center">
+              <thead className="text-center">
+                <tr className="text-center">
+                  <th className="text-center"></th>
+                  <th className="text-center"></th>
+                  {uniqueDates.map((date, index) => (
+                    <th key={`date-${index}`} className="text-center">
+                      {date}
+                    </th>
+                  ))}
+                </tr>
+                <tr className="text-center">
+                  <th className="text-center">משמרת</th>
+                  <th className="text-center">חדר</th>
+                  {daysOfWeek.map((day, index) => (
+                    <th key={`day-${index}`} className="text-center">
+                      {day}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {shifts.map((shift) => (
+                  <React.Fragment key={shift}>
+                    {rooms.map((room, roomIndex) => (
+                      <tr key={`${shift}-${room}`} className="text-center">
+                        {roomIndex === 0 && (
+                          <td rowSpan={rooms.length} className="align-middle text-center">
+                            {shift}
+                          </td>
+                        )}
+                        <td className="align-middle text-center">{room}</td>
+                        {daysOfWeek.map((day) => {
+                          const currentSchedule = localSchedules.find(
+                            (s) =>
+                              s.day === day &&
+                              s.shift_details.shift_type === shift &&
+                              s.shift_details.room === room
+                          );
+                          return (
+                            <td key={`${day}-${shift}-${room}`} className="align-middle text-center">
+                              <select
+                                className="form-select"
+                                value={currentSchedule?.employee_id || ""}
+                                onChange={(e) =>
+                                  updateEmployee(day, shift, room, Number(e.target.value))
+                                }
+                              >
+                                <option value="">None</option>
+                                {employees.map((employee) => (
+                                  <option key={employee.id} value={employee.id}>
+                                    {employee.user.first_name} {employee.user.last_name}
+                                  </option>
+                                ))}
+                                {currentSchedule?.employee_id &&
+                                  !employees.find(emp => emp.id === currentSchedule.employee_id) && (
+                                    <option value={currentSchedule.employee_id}>
+                                      {currentSchedule.employee_name}
+                                    </option>
+                                  )}
+                              </select>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div style={{ direction: "rtl" }}>
-        <table className="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th></th>
-              <th></th>
-              {uniqueDates.map((date, index) => (
-                <th key={`date-${index}`}>{date}</th>
-              ))}
-            </tr>
-            <tr>
-              <th>משמרת</th>
-              <th>חדר</th>
-              {daysOfWeek.map((day, index) => (
-                <th key={`day-${index}`}>{day}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {shifts.map((shift) => (
-              <React.Fragment key={shift}>
-                {rooms.map((room, roomIndex) => (
-                  <tr key={`${shift}-${room}`}>
-                    {roomIndex === 0 && (
-                      <td rowSpan={rooms.length} className="text-center align-middle">
-                        {shift}
-                      </td>
-                    )}
-                    <td className="text-center">{room}</td>
-                    {daysOfWeek.map((day) => {
-                      const currentSchedule = localSchedules.find(
-                        (s) =>
-                          s.day === day &&
-                          s.shift_details.shift_type === shift &&
-                          s.shift_details.room === room
-                      );
-                      return (
-                        <td key={`${day}-${shift}-${room}`} className="text-center">
-                          <select
-                            className="form-select"
-                            value={currentSchedule?.employee_id || ""}
-                            onChange={(e) => updateEmployee(day, shift, room, Number(e.target.value))}
-                          >
-                            <option value="">None</option>
-                            {employees.map((employee) => (
-                              <option key={employee.id} value={employee.id}>
-                                {employee.user.first_name} {employee.user.last_name}
-                              </option>
-                            ))}
-                            {currentSchedule?.employee_id && !employees.find(emp => emp.id === currentSchedule.employee_id) && (
-                              <option value={currentSchedule.employee_id}>
-                                {currentSchedule.employee_name}
-                              </option>
-                            )}
-                          </select>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-        <button className="btn btn-danger mt-3" onClick={deleteScheduleForWeek}>
+      <div className="d-flex gap-2 mt-3">
+        <button className="btn btn-danger" onClick={deleteScheduleForWeek}>
           🗑 Delete Weekly Schedule
         </button>
-        <button className="btn btn-success mt-3" onClick={approveSchedule}>
+        <button className="btn btn-success" onClick={approveSchedule}>
           Approve Schedule
         </button>
-        <button className="btn btn-primary mt-3" onClick={saveSchedule}>
+        <button className="btn btn-primary" onClick={saveSchedule}>
           Save Changes
         </button>
       </div>

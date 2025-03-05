@@ -1,0 +1,19 @@
+.custom-row-even-room-even,
+.custom-row-even-room-even td {
+  background-color: #faf895dc !important;
+}
+
+.custom-row-even-room-odd,
+.custom-row-even-room-odd td {
+  background-color: #f7d488c9 !important;
+}
+
+.custom-row-odd-room-even,
+.custom-row-odd-room-even td {
+  background-color: #b2dcf0 !important;
+}
+
+.custom-row-odd-room-odd,
+.custom-row-odd-room-odd td {
+  background-color: #9ac8dd !important;
+}

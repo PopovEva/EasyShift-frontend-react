@@ -21,7 +21,6 @@ const CreateSchedule = () => {
       toast.error('Branch ID is missing. Please log in again.');
       return;
     }
-  
     dispatch(fetchRooms());
   }, [dispatch]);
 
@@ -45,7 +44,6 @@ const CreateSchedule = () => {
       toast.error('Please select a start date and at least one room');
       return;
     }
-
     const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
     const weekDates = getWeekDates(startDate);
     const scheduleTemplate = daysOfWeek.map((day, index) => ({
@@ -71,14 +69,12 @@ const CreateSchedule = () => {
         toast.error('Branch ID is missing. Please log in again.');
         return;
       }
-
       const formattedSchedule = schedule.map((day) => ({
         day: day.day,
         shifts: day.shifts.map((shift) => ({
           shift: shift.shift,
           rooms: shift.rooms.map((room) => ({
             room: room.room,
-            // employee: room.employee || null,
             start_time: '08:00:00',
             end_time: '12:00:00',
           })),
@@ -99,107 +95,137 @@ const CreateSchedule = () => {
     }
   };
 
+  // Checkbox room selection handler
+  const handleRoomSelection = (e, roomName) => {
+    if (e.target.checked) {
+      dispatch(setSelectedRooms([...selectedRooms, roomName]));
+    } else {
+      dispatch(setSelectedRooms(selectedRooms.filter((room) => room !== roomName)));
+    }
+  };
 
   return (
-    <div>
-      <h2>Create Schedule</h2>
-      <div className="mb-4">
-        <label className="form-label">Start Date:</label>
-        <input
-          type="date"
-          className="form-control"
-          value={startDate}
-          onChange={(e) => dispatch(setStartDate(e.target.value))}
-        />
-
-        <label className="form-label mt-3">Select Rooms:</label>
-        <select
-          multiple
-          className="form-control"
-          value={selectedRooms}
-          onChange={(e) =>
-            dispatch(setSelectedRooms(Array.from(e.target.selectedOptions).map((o) => o.value)))
-          }
-        >
-          {rooms.length > 0 ? (
-            rooms.map((room) => (
-              <option key={room.id} value={room.name}>
-                {room.name}
-              </option>
-            ))
-          ) : (
-            <option disabled>No rooms available for this branch</option>
-          )}
-        </select>
-
-        <label className="form-label mt-3">Select Shifts:</label>
-        <select
-          className="form-control"
-          value={shifts.join(',')}
-          onChange={(e) => dispatch(setShifts(e.target.value.split(',')))}
-        >
-          <option value="בוקר,ערב">בוקר, ערב</option>
-          <option value="בוקר,אמצע,ערב">בוקר, אמצע, ערב</option>
-        </select>
-
-        <button className="btn btn-primary mt-3" onClick={generateSchedule}>
-          Generate Schedule
-        </button>
-      </div>
-
-      {/* Schedule Table */}
-      {schedule.length > 0 && (
-        <div style={{ direction: 'rtl' }}>
-          <table className="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-                {schedule.map((day) => (
-                  <th key={day.day}>{day.date}</th>
-                ))}
-              </tr>
-              <tr>
-                <th>משמרת</th>
-                <th>חדר</th>
-                {schedule.map((day) => (
-                  <th key={day.day}>{day.day}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {shifts.map((shift, shiftIndex) => (
-                <React.Fragment key={shift}>
-                  {selectedRooms.map((room, roomIndex) => (
-                    <tr key={`${shift}-${room}`}>
-                      {roomIndex === 0 && (
-                        <td
-                          rowSpan={selectedRooms.length}
-                          className="text-center align-middle"
-                        >
-                          {shift}
-                        </td>
-                      )}
-                      <td className="text-center">{room}</td>
-                      {schedule.map((day, dayIndex) => (
-                        <td key={`${day.day}-${shift}-${room}`} className="text-center">
-                          -
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-
-          <button className="btn btn-success mt-3" onClick={saveSchedule}>
-            Save Schedule
-          </button>
+    <div className="container mt-4">
+      <h2 className="mb-4">Create Schedule</h2>
+      <div className="row">
+        {/* Left panel – Settings */}
+        <div className="col-md-4">
+          <div className="card mb-4">
+            <div className="card-header">Schedule Settings</div>
+            <div className="card-body">
+              <div className="mb-3">
+                <label className="form-label">Start Date (from Sunday):</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={startDate}
+                  onChange={(e) => dispatch(setStartDate(e.target.value))}
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Select Rooms:</label>
+                <div>
+                  {rooms.length > 0 ? (
+                    rooms.map((room) => (
+                      <div className="form-check" key={room.id}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={selectedRooms.includes(room.name)}
+                          onChange={(e) => handleRoomSelection(e, room.name)}
+                          id={`room-${room.id}`}
+                        />
+                        <label className="form-check-label" htmlFor={`room-${room.id}`}>
+                          {room.name}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No rooms available for this branch</p>
+                  )}
+                </div>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Select Shifts:</label>
+                <div className="btn-group" role="group">
+                  <button
+                    type="button"
+                    className={`btn btn-outline-primary ${shifts.length === 2 ? 'active' : ''}`}
+                    onClick={() => dispatch(setShifts(['בוקר', 'ערב']))}
+                  >
+                    2 Shifts
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn btn-outline-primary ${shifts.length === 3 ? 'active' : ''}`}
+                    onClick={() => dispatch(setShifts(['בוקר', 'אמצע', 'ערב']))}
+                  >
+                    3 Shifts
+                  </button>
+                </div>
+              </div>
+              <button className="btn btn-primary w-100" onClick={generateSchedule}>
+                Generate Schedule
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-
-      {error && <p className="text-danger mt-3">{error}</p>}
+        {/* Right panel – Schedule Preview */}
+        <div className="col-md-8">
+          {schedule.length > 0 && (
+            <div className="card" dir="rtl">
+              <div className="card-header">תצוגה מקדימה</div>
+              <div className="card-body">
+                <div className="table-responsive">
+                  <table className="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th></th>
+                        {schedule.map((day) => (
+                          <th key={day.day}>{day.date}</th>
+                        ))}
+                      </tr>
+                      <tr>
+                        <th>משמרת</th>
+                        <th>חדר</th>
+                        {schedule.map((day) => (
+                          <th key={day.day}>{day.day}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {shifts.map((shift) => (
+                        <React.Fragment key={shift}>
+                          {selectedRooms.map((room) => (
+                            <tr key={`${shift}-${room}`}>
+                              {selectedRooms.indexOf(room) === 0 && (
+                                <td rowSpan={selectedRooms.length} className="text-center align-middle">
+                                  {shift}
+                                </td>
+                              )}
+                              <td className="text-center">{room}</td>
+                              {schedule.map((day) => (
+                                <td key={`${day.day}-${shift}-${room}`} className="text-center">
+                                  -
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <button className="btn btn-success w-100" onClick={saveSchedule}>
+                  Save Schedule
+                </button>
+              </div>
+            </div>
+          )}
+          {error && <p className="text-danger mt-3">{error}</p>}
+        </div>
+      </div>
     </div>
   );
 };

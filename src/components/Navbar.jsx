@@ -20,7 +20,7 @@ const Navbar = () => {
       <div className="container-fluid">
         <div className="d-flex align-items-center">
         <img src={logo} alt="Logo" width="170" height="auto" className="me-4" />
-          <span className="navbar-brand mb-0 h1 text-white">ShiftEasy</span>
+          <span className="navbar-brand mb-0 h1 text-white">EasyShift</span>
         </div>
 
         <div className="d-flex align-items-center">
