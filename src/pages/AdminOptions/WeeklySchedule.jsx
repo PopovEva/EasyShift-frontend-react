@@ -16,6 +16,7 @@ const WeeklySchedule = () => {
 
   // Helper: get week start date (Sunday)
   const getWeekStart = (date) => {
+    // Adjust date to Sunday (start of the week)
     const d = new Date(date);
     const day = d.getDay();
     d.setDate(d.getDate() - day);
@@ -150,7 +151,7 @@ const WeeklySchedule = () => {
                 {shifts.map((shift, shiftIndex) => (
                   <React.Fragment key={shift}>
                     {rooms.map((room, roomIndex) => {
-                      // Определяем класс строки на основе индексов shiftIndex и roomIndex
+                      // Determine row class based on shift and room indices
                       const rowClass =
                         shiftIndex % 2 === 0
                           ? roomIndex % 2 === 0
@@ -167,7 +168,9 @@ const WeeklySchedule = () => {
                               {shift}
                             </td>
                           )}
-                          <td className="align-middle">{room}</td>
+                          <td className="align-middle room-cell">
+                          <strong>{room}</strong>
+                            </td>
                           {daysOfWeek.map((day) => {
                             const currentSchedule = schedules.find(
                               (s) =>

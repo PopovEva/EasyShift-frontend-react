@@ -1,70 +1,136 @@
-# Getting Started with Create React App
+# EasyShift - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository contains the frontend implementation for **EasyShift**, a user-friendly scheduling management application developed using React, Redux Toolkit, and Bootstrap. The frontend interacts with the [EasyShift backend](https://github.com/PopovEva/EasyShift-backend-django) to provide an intuitive interface for managing employee shifts and schedules across multiple branches.
 
-## Available Scripts
+## 🚀 Tech Stack
 
-In the project directory, you can run:
+- **React 18.3.1**
+- **Redux Toolkit**
+- **React Router DOM**
+- **Axios**
+- **Bootstrap 5.3.3**
+- **React Bootstrap**
+- **React Datepicker**
+- **FontAwesome Icons**
+- **React Toastify**
 
-### `npm start`
+## 🖥 User Interface
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The frontend includes:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🔐 Authentication
+- Secure JWT-based login for Admins and Workers
 
-### `npm test`
+### 📌 Admin Panel
+- Manage profile data
+- CRUD operations for employees, rooms, branches
+- Create, update, approve, and delete schedules
+- Manage and view weekly schedules
+- Notifications handling
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 📅 Worker Panel
+- View personal weekly schedule
+- Submit shift preferences (planned feature)
+- Manage personal profile data
 
-### `npm run build`
+## 📂 Project Structure
+```
+src/
+├── api/
+│   └── axios.js
+├── assets/
+├── components/
+│   ├── Footer.jsx
+│   ├── Navbar.jsx
+│   └── PrivateRoute.jsx
+├── pages/
+│   ├── AdminOptions/
+│   │   ├── AdminProfileData.jsx
+│   │   ├── AdminScheduleManagement.jsx
+│   │   ├── BranchesList.jsx
+│   │   ├── BranchCreateModal.jsx
+│   │   ├── BranchEditModal.jsx
+│   │   ├── CreateSchedule.jsx
+│   │   ├── EmployeesList.jsx
+│   │   ├── EmployeeCreateModal.jsx
+│   │   ├── EmployeeEditModal.jsx
+│   │   ├── RoomsList.jsx
+│   │   ├── RoomCreateModal.jsx
+│   │   ├── RoomEditModal.jsx
+│   │   └── WeeklySchedule.jsx
+│   ├── WeeklySchedule/
+│   │   ├── WeeklySchedule.jsx
+│   │   └── WeeklySchedule.css
+│   └── WorkerOptions/
+│       ├── AdminProfile.jsx
+│       ├── Login.jsx
+│       ├── SubmitShifts.jsx
+│       ├── WeeklySchedule.jsx
+│       ├── WorkerProfile.jsx
+│       └── WorkerProfileData.jsx
+├── slices/
+│   ├── createScheduleSlice.js
+│   ├── scheduleSlice.js
+│   └── userSlice.js
+├── App.jsx
+├── App.css
+├── index.js
+└── store.js
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚧 Installation and Setup
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Clone Repository
+```bash
+git clone https://github.com/PopovEva/EasyShift-frontend-react.git
+cd EasyShift-frontend-react
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Install Dependencies
+```bash
+npm install
+```
 
-### `npm run eject`
+### Run Application
+```bash
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Frontend application will run at [http://localhost:3000](http://localhost:3000).
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🌐 API Integration
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Configured to interact with the backend via Axios:
+- Base URL: set in `src/api/axios.js`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📦 Dependencies
+Check `package.json` for detailed information:
+```json
+{
+  "react": "^18.3.1",
+  "react-router-dom": "^7.0.1",
+  "redux": "^5.0.1",
+  "@reduxjs/toolkit": "^2.5.0",
+  "axios": "^1.7.8",
+  "bootstrap": "^5.3.3",
+  "react-bootstrap": "^2.10.9",
+  "react-datepicker": "^8.1.0",
+  "react-toastify": "^10.0.6",
+  "@fortawesome/react-fontawesome": "^0.2.2"
+}
+```
 
-## Learn More
+## 📸 Screenshots
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Screenshots of the application's interface are available in the repository (`/screenshots` folder).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🚀 Future Features
+- Employee shift preference submission
+- Enhanced AI-based schedule optimization
 
-### Code Splitting
+## 📥 Contributing
+Pull requests are encouraged. For major changes, please open an issue first to discuss your proposals.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+⭐️ **EasyShift** streamlines scheduling operations, making it easier for administrators and employees to manage work shifts effectively.
