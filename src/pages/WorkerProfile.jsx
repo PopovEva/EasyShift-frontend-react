@@ -102,7 +102,7 @@ const WorkerProfile = () => {
 
   return (
     <div>
-      <div className="d-flex vh-100">
+      <div className="d-flex">
         {/* Sidebar */}
         <div className="bg-light p-3" style={{ width: '20%' }}>
           <h4 className="mb-4">Worker Panel</h4>

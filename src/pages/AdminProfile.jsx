@@ -104,7 +104,7 @@ const AdminProfile = () => {
 
   return (
     <div>
-      <div className="d-flex vh-100">
+      <div className="d-flex">
         {/* Панель управления */}
         <div className="bg-light p-3" style={{ width: "20%" }}>
           <h4 className="mb-4">Admin Panel</h4>
@@ -184,6 +184,18 @@ const AdminProfile = () => {
                 }}
               >
                 Manage Schedules
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("showShiftPrefs", "true");
+                  sessionStorage.setItem("admin_active_tab", "manage-schedules");
+                  setActiveOption("manage-schedules");
+                }}
+              >
+                Shift Preferences
               </button>
             </li>
             <li className="nav-item mb-2">

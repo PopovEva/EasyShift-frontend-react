@@ -10,15 +10,56 @@ import "../../toastStyles.css";
 import API from "../../api/axios";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import AdminShiftPreferences from "./AdminShiftPreferences";
 
 const AdminScheduleManagement = ({ branchId }) => {
   const dispatch = useDispatch();
   const { availableWeeks, selectedWeek, loading, error } = useSelector(
     (state) => state.schedule
   );
+  const englishToHebrewDay = {
+    "Monday": "ראשון",
+    "Tuesday": "שני",
+    "Wednesday": "שלישי",
+    "Thursday": "רביעי",
+    "Friday": "חמישי",
+    "Saturday": "שישי",
+    "Sunday": "שבת"
+  };
 
   const [localSchedules, setLocalSchedules] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [showShiftPrefs, setShowShiftPrefs] = useState(false); // state to toggle shift preferences
+  const [shiftPrefs, setShiftPrefs] = useState([]);
+
+  // Check sessionStorage flag to auto-show shift preferences
+  useEffect(() => {
+    if (sessionStorage.getItem("showShiftPrefs") === "true") {
+      setShowShiftPrefs(true);
+      sessionStorage.removeItem("showShiftPrefs");
+    }
+  }, []);
+
+  // Загружаем shiftPrefs при изменении branchId или selectedWeek
+  useEffect(() => {
+    const fetchShiftPrefs = async () => {
+      if (!branchId || !selectedWeek) return;
+      try {
+        const res = await API.get('/shift-preferences-admin/', {
+          params: {
+            branch_id: branchId,
+            week_start_date: selectedWeek,
+          },
+        });
+        setShiftPrefs(res.data);
+      } catch (err) {
+        console.error('Failed to fetch shift preferences:', err);
+        toast.error('Failed to fetch shift preferences.');
+      }
+    };
+
+    fetchShiftPrefs();
+  }, [branchId, selectedWeek]);
 
   // Helper: adjust date to Sunday (start of week)
   const getWeekStart = (date) => {
@@ -87,6 +128,7 @@ const AdminScheduleManagement = ({ branchId }) => {
           const employee = employees.find((emp) => emp.id === schedule.employee_id);
           return {
             ...schedule,
+            day: englishToHebrewDay[schedule.day] || schedule.day,
             employee_name: employee
               ? `${employee.user.first_name} ${employee.user.last_name}`
               : "Not assigned"
@@ -109,7 +151,8 @@ const AdminScheduleManagement = ({ branchId }) => {
       prevSchedules.map((schedule) =>
         schedule.day === day &&
         schedule.shift_details.shift_type === shiftType &&
-        schedule.shift_details.room === room
+        schedule.shift_details.room_details &&
+        schedule.shift_details.room_details.id === room.id
           ? { 
               ...schedule, 
               employee_id: employeeId, 
@@ -250,7 +293,13 @@ const AdminScheduleManagement = ({ branchId }) => {
 
   const daysOfWeek = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
   const shifts = [...new Set(localSchedules.map((s) => s.shift_details.shift_type))];
-  const rooms = [...new Set(localSchedules.map((s) => s.shift_details.room))];
+  const rooms = Array.from(
+    new Map(
+      localSchedules
+        .filter((s) => s.shift_details.room_details)  // отфильтровываем записи без room_details
+        .map((s) => [s.shift_details.room_details.id, s.shift_details.room_details])
+    ).values()
+  );
   const uniqueDates = selectedWeek ? getWeekDates(selectedWeek) : [];
   const selectedWeekDate = selectedWeek ? new Date(selectedWeek) : null;
 
@@ -320,22 +369,37 @@ const AdminScheduleManagement = ({ branchId }) => {
                 {shifts.map((shift) => (
                   <React.Fragment key={shift}>
                     {rooms.map((room, roomIndex) => (
-                      <tr key={`${shift}-${room}`} className="text-center">
+                      <tr key={`${shift}-${room.id}`} className="text-center">
                         {roomIndex === 0 && (
                           <td rowSpan={rooms.length} className="align-middle text-center">
                             {shift}
                           </td>
                         )}
-                        <td className="align-middle text-center">{room}</td>
+                        <td className="align-middle text-center">{room.name}</td>
                         {daysOfWeek.map((day) => {
                           const currentSchedule = localSchedules.find(
                             (s) =>
                               s.day === day &&
                               s.shift_details.shift_type === shift &&
-                              s.shift_details.room === room
+                              s.shift_details.room_details &&
+                              s.shift_details.room_details.id === room.id
                           );
+
+                          // Получаем ID комнаты из текущего расписания (если есть)
+                          const currentRoomId = currentSchedule && currentSchedule.shift_details.room_details 
+                            ? currentSchedule.shift_details.room_details.id 
+                            : null;
+                          // Фильтруем заявки для текущей ячейки (день, смена, комната)
+                          const dayPrefs = shiftPrefs.filter((pref) =>
+                            pref.day === day &&
+                            pref.shift_type === shift &&
+                            pref.room === currentRoomId
+                          );
+                          // Собираем Set из ID сотрудников, подавших заявку
+                          const employeesWhoPreferred = new Set(dayPrefs.map((p) => Number(p.employee)));
+                        
                           return (
-                            <td key={`${day}-${shift}-${room}`} className="align-middle text-center">
+                            <td key={`${day}-${shift}-${room.id}`} className="align-middle text-center">
                               <select
                                 className="form-select"
                                 value={currentSchedule?.employee_id || ""}
@@ -344,11 +408,19 @@ const AdminScheduleManagement = ({ branchId }) => {
                                 }
                               >
                                 <option value="">None</option>
-                                {employees.map((employee) => (
-                                  <option key={employee.id} value={employee.id}>
-                                    {employee.user.first_name} {employee.user.last_name}
-                                  </option>
-                                ))}
+                                {employees.map((employee) => {
+                                  const isPreferred = employeesWhoPreferred.has(Number(employee.id));
+                                  return (
+                                    <option
+                                      key={employee.id}
+                                      value={employee.id}
+                                      style={ isPreferred ? { color: 'green', fontWeight: 'bold' } : {} }
+                                    >
+                                      {employee.user.first_name} {employee.user.last_name}
+                                      {isPreferred ? ' ✔' : ''}
+                                    </option>
+                                  );
+                                })}
                                 {currentSchedule?.employee_id &&
                                   !employees.find(emp => emp.id === currentSchedule.employee_id) && (
                                     <option value={currentSchedule.employee_id}>
@@ -380,6 +452,19 @@ const AdminScheduleManagement = ({ branchId }) => {
           Save Changes
         </button>
       </div>
+      <div className="mt-4">
+        <button
+          className="btn btn-outline-primary"
+          onClick={() => setShowShiftPrefs(!showShiftPrefs)}
+        >
+          {showShiftPrefs ? "Hide Shift Preferences" : "View Shift Preferences"}
+        </button>
+      </div>
+      {showShiftPrefs && branchId && (
+        <div className="mt-4">
+          <AdminShiftPreferences branchId={branchId} />
+        </div>
+      )}
     </div>
   );
 };

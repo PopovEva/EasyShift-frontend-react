@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import "../WeeklySchedule/WeeklySchedule.css";
+import { formatDateToYMD } from '../../utils/dateUtils';
 
 const SubmitShifts = ({ branchId, initialWeek }) => {
   const [availableWeeks, setAvailableWeeks] = useState([]);
@@ -17,8 +18,8 @@ const SubmitShifts = ({ branchId, initialWeek }) => {
   const parseDate = (dateStr) => new Date(dateStr);
 
   // Handle week selection change
-  const handleWeekChange = (date) => {
-    const formatted = date.toISOString().split('T')[0]; // формат "YYYY-MM-DD"
+  const handleWeekChange = (weekStartDate) => {
+    const formatted = formatDateToYMD(weekStartDate); // формат "YYYY-MM-DD"
     setSelectedWeek(formatted);
   };
 
