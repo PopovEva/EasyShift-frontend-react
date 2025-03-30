@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../slices/userSlice";
 import API from "../../api/axios";
 import { toast } from "react-toastify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faPhone, faBuilding, faStickyNote, faKey } from "@fortawesome/free-solid-svg-icons";
 
 const WorkerProfileData = () => {
@@ -93,79 +93,85 @@ const WorkerProfileData = () => {
   }
 
   return (
-    <div className="container mt-4">
-      <div className={`card shadow-lg p-4 ${highlight ? "highlight" : ""}`}>
-        <h2 className="text-center mb-4">👷 Worker Profile</h2>
-        <div className="row">
-          {/* Username */}
-          <div className="col-md-6 mb-3">
-            <div className="form-floating">
-              <input type="text" className="form-control" value={profileData.username} disabled />
-              <label><FontAwesomeIcon icon={faUser} /> Username (cannot be changed)</label>
+    <div className="container-fluid mt-4 no-horizontal-padding">
+      <div className="row justify-content-center">
+        <div className="col-12">
+          <div className={`card shadow-lg p-4 ${highlight ? "highlight" : ""}`}>
+            <h2 className="text-center mb-4">👷 Worker Profile</h2>
+            <div className="row">
+              {/* Username */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input type="text" className="form-control" value={profileData.username} disabled />
+                  <label><FontAwesomeIcon icon={faUser} /> Username (cannot be changed)</label>
+                </div>
+              </div>
+    
+              {/* First Name */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input type="text" className="form-control" name="first_name" value={profileData.first_name} onChange={handleChange} />
+                  <label><FontAwesomeIcon icon={faUser} /> First Name</label>
+                </div>
+              </div>
+    
+              {/* Last Name */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input type="text" className="form-control" name="last_name" value={profileData.last_name} onChange={handleChange} />
+                  <label><FontAwesomeIcon icon={faUser} /> Last Name</label>
+                </div>
+              </div>
+    
+              {/* Email */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input type="email" className="form-control" name="email" value={profileData.email} onChange={handleChange} />
+                  <label><FontAwesomeIcon icon={faEnvelope} /> Email</label>
+                </div>
+              </div>
+    
+              {/* Phone Number */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input type="text" className="form-control" name="phone_number" value={profileData.phone_number} onChange={handleChange} />
+                  <label><FontAwesomeIcon icon={faPhone} /> Phone Number</label>
+                </div>
+              </div>
+    
+              {/* Branch */}
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input type="text" className="form-control" value={branchName} disabled />
+                  <label><FontAwesomeIcon icon={faBuilding} /> Branch</label>
+                </div>
+              </div>
+    
+              {/* Notes */}
+              <div className="col-md-12 mb-3">
+                <div className="form-floating">
+                  <textarea className="form-control" name="notes" value={profileData.notes} onChange={handleChange} />
+                  <label><FontAwesomeIcon icon={faStickyNote} /> Notes</label>
+                </div>
+              </div>
+    
+              {/* Password */}
+              <div className="col-md-12 mb-3">
+                <div className="form-floating">
+                  <input type="password" className="form-control" name="password" value={profileData.password} onChange={handleChange} placeholder="Leave blank to keep current password" />
+                  <label style={{ whiteSpace: "normal" }}>
+                    <FontAwesomeIcon icon={faKey} /> New Password (leave blank to keep unchanged)
+                  </label>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* First Name */}
-          <div className="col-md-6 mb-3">
-            <div className="form-floating">
-              <input type="text" className="form-control" name="first_name" value={profileData.first_name} onChange={handleChange} />
-              <label><FontAwesomeIcon icon={faUser} /> First Name</label>
-            </div>
-          </div>
-
-          {/* Last Name */}
-          <div className="col-md-6 mb-3">
-            <div className="form-floating">
-              <input type="text" className="form-control" name="last_name" value={profileData.last_name} onChange={handleChange} />
-              <label><FontAwesomeIcon icon={faUser} /> Last Name</label>
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="col-md-6 mb-3">
-            <div className="form-floating">
-              <input type="email" className="form-control" name="email" value={profileData.email} onChange={handleChange} />
-              <label><FontAwesomeIcon icon={faEnvelope} /> Email</label>
-            </div>
-          </div>
-
-          {/* Phone Number */}
-          <div className="col-md-6 mb-3">
-            <div className="form-floating">
-              <input type="text" className="form-control" name="phone_number" value={profileData.phone_number} onChange={handleChange} />
-              <label><FontAwesomeIcon icon={faPhone} /> Phone Number</label>
-            </div>
-          </div>
-
-          {/* Branch */}
-          <div className="col-md-6 mb-3">
-            <div className="form-floating">
-              <input type="text" className="form-control" value={branchName} disabled />
-              <label><FontAwesomeIcon icon={faBuilding} /> Branch</label>
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="col-md-12 mb-3">
-            <div className="form-floating">
-              <textarea className="form-control" name="notes" value={profileData.notes} onChange={handleChange} />
-              <label><FontAwesomeIcon icon={faStickyNote} /> Notes</label>
-            </div>
-          </div>
-
-          {/* Password */}
-          <div className="col-md-12 mb-3">
-            <div className="form-floating">
-              <input type="password" className="form-control" name="password" value={profileData.password} onChange={handleChange} placeholder="Leave blank to keep current password" />
-              <label><FontAwesomeIcon icon={faKey} /> New Password (leave blank to keep unchanged)</label>
-            </div>
+    
+            {/* Save Button */}
+            <button className="btn btn-primary w-100" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
           </div>
         </div>
-
-        {/* Save Button */}
-        <button className="btn btn-primary w-100" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
       </div>
     </div>
   );

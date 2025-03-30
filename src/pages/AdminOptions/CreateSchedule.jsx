@@ -59,7 +59,7 @@ const CreateSchedule = () => {
     }));
 
     dispatch(setSchedule(scheduleTemplate));
-    toast.success('Schedule generated successfully!');
+    // toast.success('Schedule generated successfully!');
   };
 
   const saveSchedule = async () => {

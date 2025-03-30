@@ -1,54 +1,54 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
-import { setUser, setTokens } from '../slices/userSlice';
-import 'react-toastify/dist/ReactToastify.css';
-import API from '../api/axios';
+import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { setUser, setTokens } from '../slices/userSlice'
+import 'react-toastify/dist/ReactToastify.css'
+import API from '../api/axios'
 
 const Login = () => {
-    const  navigate = useNavigate();
-    const dispatch = useDispatch();
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try{
-          const response = await API.post('/token/', { username, password });
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await API.post('/token/', { username, password })
 
+      // Save tokens in Redux and localStorage
+      dispatch(setTokens({ access: response.data.access, refresh: response.data.refresh }))
+      localStorage.setItem('access_token', response.data.access)
+      localStorage.setItem('refresh_token', response.data.refresh)
 
-            // Сохраняем токены в Redux и localStorage
-            dispatch(setTokens({ access: response.data.access, refresh: response.data.refresh }));
-            localStorage.setItem('access_token', response.data.access);
-            localStorage.setItem('refresh_token', response.data.refresh);
+      // toast.success('Login successful!')
 
-            // Уведомление об успешной авторизации
-            toast.success('Login successful!');
+      // Get user info
+      const userInfo = await API.get('/user-info/')
+      dispatch(setUser(userInfo.data))
 
-            //geting user info
-            const userInfo = await API.get('/user-info/');
-            dispatch(setUser(userInfo.data)); // Сохраняем данные пользователя в Redux
+      // Check group
+      if (userInfo.data.group === 'Admin') {
+        navigate('/admin-profile')
+      } else if (userInfo.data.group === 'Worker') {
+        navigate('/worker-profile')
+      } else {
+        toast.error('User group not recognized')
+      }
+    } catch (err) {
+      setError('Invalid username or password')
+      toast.error('Invalid username or password')
+    }
+  }
 
-            //chek groop
-            if (userInfo.data.group === 'Admin') {
-                navigate('/admin-profile');
-            } else if (userInfo.data.group === 'Worker') {
-                navigate('/worker-profile');
-            } else {
-                toast.error('User group not recognized');
-            }
-        } catch (err){
-            setError('Invalid username or password');
-            toast.error('Invalid username or password');
-        }
-    };
-
-    return (
-        <div className="container mt-5">
-          <h1 className="text-center">Login</h1>
-          <form onSubmit={handleLogin} className="w-50 mx-auto">
+  return (
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-12 col-sm-10 col-md-8 col-lg-6">
+          <h1 className="text-center mb-4">Login</h1>
+          <form onSubmit={handleLogin}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">Username</label>
               <input
@@ -75,8 +75,9 @@ const Login = () => {
           </form>
           {error && <p className="text-danger text-center mt-3">{error}</p>}
         </div>
-
-    );
-};
+      </div>
+    </div>
+  )
+}
 
 export default Login

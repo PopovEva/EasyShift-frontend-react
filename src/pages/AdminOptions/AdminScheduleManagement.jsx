@@ -11,10 +11,13 @@ import API from "../../api/axios";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AdminShiftPreferences from "./AdminShiftPreferences";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import PraiseYourself from "../../components/PraiseYourself";
 
 const AdminScheduleManagement = ({ branchId }) => {
   const dispatch = useDispatch();
-  const { availableWeeks, selectedWeek, loading, error } = useSelector(
+  const { availableWeeks, selectedWeek, loading } = useSelector(
     (state) => state.schedule
   );
   const englishToHebrewDay = {
@@ -29,7 +32,7 @@ const AdminScheduleManagement = ({ branchId }) => {
 
   const [localSchedules, setLocalSchedules] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [showShiftPrefs, setShowShiftPrefs] = useState(false); // state to toggle shift preferences
+  const [showShiftPrefs, setShowShiftPrefs] = useState(false);
   const [shiftPrefs, setShiftPrefs] = useState([]);
 
   // Check sessionStorage flag to auto-show shift preferences
@@ -204,6 +207,26 @@ const AdminScheduleManagement = ({ branchId }) => {
     }
   };
 
+  // Return status of schedule for the selected week to Draft
+  const returnToDraft = async () => {
+    try {
+      await API.post(`/update-schedule/`, {
+        branch_id: branchId,
+        schedules: localSchedules.map((schedule) => ({
+          week_start_date: schedule.week_start_date,
+          day: schedule.day,
+          shift_details: schedule.shift_details,
+          employee_id: schedule.employee_id || null
+        })),
+        status: "draft"
+      });
+      toast.success("Schedule status changed to draft successfully!");
+    } catch (err) {
+      console.error("Failed to change schedule to draft:", err.response?.data || err.message);
+      toast.error("Failed to change schedule to draft.");
+    }
+  };
+
   // Delete schedule for the selected week
   const deleteScheduleForWeek = async () => {
     const confirm = await new Promise((resolve) => {
@@ -340,7 +363,7 @@ const AdminScheduleManagement = ({ branchId }) => {
       
       <div className="card mt-3" dir="rtl">
         <div className="card-header text-center" style={{ backgroundColor: "lightblue" }}>
-          תצוגה מקדימה
+          לוח משמרות שבועי
         </div>
         <div className="card-body">
           <div className="table-responsive">
@@ -442,22 +465,40 @@ const AdminScheduleManagement = ({ branchId }) => {
       </div>
 
       <div className="d-flex gap-2 mt-3">
-        <button className="btn btn-danger" onClick={deleteScheduleForWeek}>
-          🗑 Delete Weekly Schedule
+        <button className="btn btn-primary" onClick={saveSchedule}>
+          Save Changes
         </button>
         <button className="btn btn-success" onClick={approveSchedule}>
           Approve Schedule
         </button>
-        <button className="btn btn-primary" onClick={saveSchedule}>
-          Save Changes
+        <button className="btn btn-danger" onClick={deleteScheduleForWeek}>
+          🗑 Delete Weekly Schedule
         </button>
+        <button className="btn btn-warning" onClick={returnToDraft}>
+          Return to Draft
+        </button>
+        <PraiseYourself
+          buttonLabel="You are doing a great job 🎉"
+          confettiDuration={5000}
+          buttonClass="btn btn-info"
+        />
       </div>
       <div className="mt-4">
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-center"
           onClick={() => setShowShiftPrefs(!showShiftPrefs)}
         >
-          {showShiftPrefs ? "Hide Shift Preferences" : "View Shift Preferences"}
+          {showShiftPrefs ? (
+            <>
+              <span>Hide Shift Preferences</span>
+              <FontAwesomeIcon icon={faChevronUp} className="ms-2" />
+            </>
+          ) : (
+            <>
+              <span>View Shift Preferences</span>
+              <FontAwesomeIcon icon={faChevronDown} className="ms-2" />
+            </>
+          )}
         </button>
       </div>
       {showShiftPrefs && branchId && (

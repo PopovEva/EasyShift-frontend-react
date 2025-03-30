@@ -126,7 +126,7 @@ const AdminShiftPreferences = ({ branchId }) => {
     return (
       <div className="card mt-3" dir="rtl">
         <div className="card-header text-center" style={{ backgroundColor: "lightblue", border: "2px solid #ccc" }}>
-          תצוגה מקדימה
+          משמרות מעובדים
         </div>
         <div className="card-body">
           <div className="table-responsive">

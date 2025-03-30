@@ -9,6 +9,7 @@ import RoomsList from "./AdminOptions/RoomsList";
 import BranchesList from "./AdminOptions/BranchesList";
 import WeeklySchedule from "./AdminOptions/WeeklySchedule";
 import AdminScheduleManagement from "./AdminOptions/AdminScheduleManagement";
+import { FaChevronRight } from "react-icons/fa";
 
 const AdminProfile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -16,9 +17,11 @@ const AdminProfile = () => {
   const [employees, setEmployees] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState(null);
-  const [activeOption, setActiveOption] = useState(sessionStorage.getItem("admin_active_tab") || "profile");
+  const [activeOption, setActiveOption] = useState(
+    sessionStorage.getItem("admin_active_tab") || "profile"
+  );
 
-  // Загрузка данных администратора и сотрудников
+  // Fetch admin and employees data
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
@@ -40,7 +43,7 @@ const AdminProfile = () => {
     fetchAdminData();
   }, []);
 
-  // Загрузка уведомлений администратора
+  // Fetch admin notifications
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -55,7 +58,7 @@ const AdminProfile = () => {
     fetchNotifications();
   }, []);
 
-  // Функция для рендера активного компонента
+  // Function to render active component
   const renderOption = () => {
     switch (activeOption) {
       case "profile":
@@ -71,7 +74,11 @@ const AdminProfile = () => {
       case "weekly-schedule":
         return <WeeklySchedule />;
       case "manage-schedules":
-        return branchId ? <AdminScheduleManagement branchId={branchId} /> : <p>Loading...</p>;
+        return branchId ? (
+          <AdminScheduleManagement branchId={branchId} />
+        ) : (
+          <p>Loading...</p>
+        );
       case "notifications":
         return (
           <div>
@@ -103,12 +110,36 @@ const AdminProfile = () => {
   }
 
   return (
-    <div>
-      <div className="d-flex">
-        {/* Панель управления */}
-        <div className="bg-light p-3" style={{ width: "20%" }}>
+    <div className="container-fluid">
+      <div className="row">
+        {/* Fixed Offcanvas Trigger for Mobile */}
+        <button
+          type="button"
+          className="d-md-none"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasSidebarAdmin"
+          aria-controls="offcanvasSidebarAdmin"
+          style={{
+            position: "fixed",
+            left: "0",
+            top: "50%",
+            transform: "translateY(-50%)",
+            backgroundColor: "#343a40",
+            border: "none",
+            color: "#fff",
+            borderRadius: "50%",
+            width: "50px",
+            height: "50px",
+            zIndex: 1050,
+          }}
+        >
+          <FaChevronRight />
+        </button>
+        {/* Desktop Permanent Sidebar */}
+        <div className="col-md-3 d-none d-md-block bg-light p-3">
           <h4 className="mb-4">Admin Panel</h4>
           <ul className="nav flex-column">
+            {/* Sidebar buttons */}
             <li className="nav-item mb-2">
               <button
                 className="btn btn-outline-primary w-100"
@@ -199,20 +230,152 @@ const AdminProfile = () => {
               </button>
             </li>
             <li className="nav-item mb-2">
-              <button className="btn btn-outline-warning w-100" 
-              onClick={() => {
-                sessionStorage.setItem("admin_active_tab", "notifications");
-                setActiveOption("notifications");
-              }}
+              <button
+                className="btn btn-outline-warning w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "notifications");
+                  setActiveOption("notifications");
+                }}
               >
                 📢 Admin Notifications
               </button>
             </li>
           </ul>
         </div>
-
-        {/* Динамическая часть */}
-        <div className="p-3 flex-grow-1">{renderOption()}</div>
+        {/* Main Content */}
+        <div className="col-12 col-md-9 p-3">{renderOption()}</div>
+      </div>
+      {/* Mobile Offcanvas Sidebar */}
+      <div
+        className="offcanvas offcanvas-start"
+        tabIndex="-1"
+        id="offcanvasSidebarAdmin"
+        aria-labelledby="offcanvasSidebarAdminLabel"
+      >
+        <div className="offcanvas-header">
+          <h5 className="offcanvas-title" id="offcanvasSidebarAdminLabel">
+            Admin Panel
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="offcanvas-body">
+          <ul className="nav flex-column">
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "profile");
+                  setActiveOption("profile");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Profile Data
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "employees");
+                  setActiveOption("employees");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Employees
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "rooms");
+                  setActiveOption("rooms");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Rooms
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "branches");
+                  setActiveOption("branches");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Branches
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "schedule");
+                  setActiveOption("schedule");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Create Schedule
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "weekly-schedule");
+                  setActiveOption("weekly-schedule");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Weekly Schedule
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "manage-schedules");
+                  setActiveOption("manage-schedules");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Manage Schedules
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  sessionStorage.setItem("showShiftPrefs", "true");
+                  sessionStorage.setItem("admin_active_tab", "manage-schedules");
+                  setActiveOption("manage-schedules");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                Shift Preferences
+              </button>
+            </li>
+            <li className="nav-item mb-2">
+              <button
+                className="btn btn-outline-warning w-100"
+                onClick={() => {
+                  sessionStorage.setItem("admin_active_tab", "notifications");
+                  setActiveOption("notifications");
+                }}
+                data-bs-dismiss="offcanvas"
+              >
+                📢 Admin Notifications
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

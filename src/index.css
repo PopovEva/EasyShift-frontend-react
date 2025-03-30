@@ -34,3 +34,21 @@ html, body {
 .content {
   flex-grow: 1;
 }
+@media (max-width: 576px) {
+  body {
+    font-size: 14px;
+  }
+  .container {
+    padding: 0 10px;
+  }
+  .no-horizontal-padding {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+.textarea-break {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}

@@ -4,6 +4,7 @@ import API from "../../api/axios";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../WeeklySchedule/WeeklySchedule.css";
+import PraiseYourself from "../../components/PraiseYourself";
 
 const WeeklySchedule = () => {
   const { user } = useSelector((state) => state.user);
@@ -126,7 +127,7 @@ const WeeklySchedule = () => {
     return (
       <div className="card mt-3" dir="rtl">
         <div className="card-header text-center" style={{ backgroundColor: "lightblue" }}>
-          תצוגה מקדימה
+          לוח משמרות שבועי
         </div>
         <div className="card-body">
           <div className="table-responsive">
@@ -235,6 +236,14 @@ const WeeklySchedule = () => {
         />
       </div>
       {renderScheduleTable()}
+
+      <div className="mt-4 d-flex justify-content-center">
+        <PraiseYourself
+          buttonLabel="You are doing a great job 🎉"
+          confettiDuration={5000}
+          buttonClass="btn my-praise-button"
+        />
+      </div>
       {error && <p className="text-danger">{error}</p>}
     </div>
   );

@@ -188,7 +188,7 @@ const SubmitShifts = ({ branchId, initialWeek }) => {
     return (
       <div className="card mt-3" dir="rtl">
         <div className="card-header text-center" style={{ backgroundColor: "lightblue" }}>
-          תצוגה מקדימה
+          הגשת משמרות:
         </div>
         <div className="card-body">
           <div className="table-responsive">
