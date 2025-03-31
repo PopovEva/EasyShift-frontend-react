@@ -38,13 +38,39 @@ html, body {
   body {
     font-size: 14px;
   }
-  .container {
-    padding: 0 10px;
+  .custom-navbar .container-fluid {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  .container,
+  .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
   .no-horizontal-padding {
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
+  .table-responsive table {
+    font-size: 0.8rem;
+  }
+  .card-header {
+    font-size: 0.9rem;
+  }
+  .card-body {
+    padding: 0.5rem;
+  }
+  .card {
+    padding: 1rem;
+  }
+}
+
+.react-datepicker__input-container input,
+.react-datepicker-wrapper .form-control {
+  box-sizing: border-box;
+  padding-bottom: 0.75rem !important; /* Подберите оптимальное значение */
 }
 
 .textarea-break {

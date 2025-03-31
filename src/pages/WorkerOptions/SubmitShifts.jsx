@@ -261,7 +261,7 @@ const SubmitShifts = ({ branchId, initialWeek }) => {
   );
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4 no-horizontal-padding">
       <h2>Submit Shift Preferences</h2>
       <div className="mb-3">
         <label className="form-label">Select Week:</label>

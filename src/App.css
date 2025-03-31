@@ -19,8 +19,10 @@ body {
 }
 .custom-navbar {
   background-color: rgba(14, 46, 77, 0.85) !important; /* Темно-серый с прозрачностью */
-  padding: 10px 20px;
-  /* transition: background-color 0.3s ease-in-out; */
+  padding: 10px 5px;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
 }
 
 .navbar-brand {

@@ -19,7 +19,7 @@
 }
 
 .room-cell {
-  background-color: #ebd289 !important; /* A bright background color */
+  background-color: #ebd289 !important;
 }
 
 .btn.my-praise-button {
@@ -28,26 +28,90 @@
   color: #000000 !important;
 }
 
-@media (max-width: 576px) {
-  .table-responsive table {
-    font-size: 0.8rem;
+.admin-schedule-table td {
+  padding: 0.5rem;
+}
+
+.admin-schedule-actions {
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.react-datepicker__input-container input,
+.react-datepicker-wrapper .form-control {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 0.75rem !important;
+}
+
+/* Общие стили адаптива для мобильных устройств */
+@media (max-width: 768px) {
+  .table-responsive,
+  .admin-schedule-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
+
+  .table-responsive table,
+  .admin-schedule-table th,
+  .admin-schedule-table td {
+    font-size: 0.75rem !important;
+    padding: 4px !important;
+    min-width: 100px !important;
+  }
+
+  .admin-schedule-table select.form-select {
+    font-size: 0.75rem !important;
+    padding: 2px 20px 2px 4px !important; /* увеличенный правый padding для стрелки */
+    text-overflow: ellipsis;
+    color: #000 !important;
+    background-color: #fff !important;
+  }
+
+  .admin-schedule-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .card-header {
     font-size: 1rem;
   }
+
   .card-body {
     padding: 0.5rem;
   }
 }
 
-/* @media (max-width: 576px) {
+.textarea-break {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
   .table-responsive table {
-    font-size: 0.8rem;
+    table-layout: auto !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
   }
-  .card-header {
-    font-size: 1rem;
+
+  .table-responsive th, 
+  .table-responsive td {
+    white-space: nowrap !important;
+    font-size: 0.7rem !important;
+    min-width: 80px !important;
+    padding: 3px !important;
   }
-  .card-body {
-    padding: 0.5rem;
+
+  .table-responsive td div {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100px !important;
   }
-} */
+
+  .table-responsive td hr {
+    display: none !important; /* убираем лишние разделители */
+  }
+}

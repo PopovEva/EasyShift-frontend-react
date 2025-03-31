@@ -14,6 +14,7 @@ import AdminShiftPreferences from "./AdminShiftPreferences";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import PraiseYourself from "../../components/PraiseYourself";
+import "../WeeklySchedule/WeeklySchedule.css";
 
 const AdminScheduleManagement = ({ branchId }) => {
   const dispatch = useDispatch();
@@ -41,6 +42,24 @@ const AdminScheduleManagement = ({ branchId }) => {
       setShowShiftPrefs(true);
       sessionStorage.removeItem("showShiftPrefs");
     }
+  }, []);
+
+  useEffect(() => {
+    const handleShowShiftPrefs = () => {
+      setShowShiftPrefs(true);
+      setTimeout(() => {
+        const shiftPrefsElement = document.getElementById("shift-preferences-section");
+        if (shiftPrefsElement) {
+          shiftPrefsElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500);
+    };
+  
+    window.addEventListener('showShiftPrefsEvent', handleShowShiftPrefs);
+  
+    return () => {
+      window.removeEventListener('showShiftPrefsEvent', handleShowShiftPrefs);
+    };
   }, []);
 
   // Загружаем shiftPrefs при изменении branchId или selectedWeek
@@ -367,7 +386,7 @@ const AdminScheduleManagement = ({ branchId }) => {
         </div>
         <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-bordered table-striped text-center">
+            <table className="table table-bordered table-striped text-center admin-schedule-table">
               <thead className="text-center">
                 <tr className="text-center">
                   <th className="text-center"></th>
@@ -425,6 +444,7 @@ const AdminScheduleManagement = ({ branchId }) => {
                             <td key={`${day}-${shift}-${room.id}`} className="align-middle text-center">
                               <select
                                 className="form-select"
+                                style={{ width: '100%', whiteSpace: 'normal' }}
                                 value={currentSchedule?.employee_id || ""}
                                 onChange={(e) =>
                                   updateEmployee(day, shift, room, Number(e.target.value))
@@ -464,7 +484,7 @@ const AdminScheduleManagement = ({ branchId }) => {
         </div>
       </div>
 
-      <div className="d-flex gap-2 mt-3">
+      <div className="admin-schedule-actions d-flex gap-2 mt-3">
         <button className="btn btn-primary" onClick={saveSchedule}>
           Save Changes
         </button>
@@ -502,7 +522,7 @@ const AdminScheduleManagement = ({ branchId }) => {
         </button>
       </div>
       {showShiftPrefs && branchId && (
-        <div className="mt-4">
+        <div className="mt-4" id="shift-preferences-section">
           <AdminShiftPreferences branchId={branchId} />
         </div>
       )}

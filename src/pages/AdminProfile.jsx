@@ -10,6 +10,7 @@ import BranchesList from "./AdminOptions/BranchesList";
 import WeeklySchedule from "./AdminOptions/WeeklySchedule";
 import AdminScheduleManagement from "./AdminOptions/AdminScheduleManagement";
 import { FaChevronRight } from "react-icons/fa";
+import "../styles/profilePanels.css";
 
 const AdminProfile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -122,21 +123,24 @@ const AdminProfile = () => {
           style={{
             position: "fixed",
             left: "0",
-            top: "50%",
-            transform: "translateY(-50%)",
+            top: "70px",
             backgroundColor: "#343a40",
             border: "none",
             color: "#fff",
-            borderRadius: "50%",
-            width: "50px",
-            height: "50px",
+            borderRadius: "0 8px 8px 0",
+            width: "32px",
+            height: "70px",
             zIndex: 1050,
+            boxShadow: "2px 2px 6px rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <FaChevronRight />
         </button>
         {/* Desktop Permanent Sidebar */}
-        <div className="col-md-3 d-none d-md-block bg-light p-3">
+        <div className="col-md-2 d-none d-md-block p-3 profile-sidebar">
           <h4 className="mb-4">Admin Panel</h4>
           <ul className="nav flex-column">
             {/* Sidebar buttons */}
@@ -224,6 +228,7 @@ const AdminProfile = () => {
                   sessionStorage.setItem("showShiftPrefs", "true");
                   sessionStorage.setItem("admin_active_tab", "manage-schedules");
                   setActiveOption("manage-schedules");
+                  window.dispatchEvent(new Event('showShiftPrefsEvent'));
                 }}
               >
                 Shift Preferences
@@ -243,11 +248,11 @@ const AdminProfile = () => {
           </ul>
         </div>
         {/* Main Content */}
-        <div className="col-12 col-md-9 p-3">{renderOption()}</div>
+        <div className="col-12 col-md-10 p-3">{renderOption()}</div>
       </div>
       {/* Mobile Offcanvas Sidebar */}
       <div
-        className="offcanvas offcanvas-start"
+        className="offcanvas offcanvas-start profile-sidebar"
         tabIndex="-1"
         id="offcanvasSidebarAdmin"
         aria-labelledby="offcanvasSidebarAdminLabel"

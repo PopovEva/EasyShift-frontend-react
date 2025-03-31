@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearUser } from '../slices/userSlice';
@@ -8,8 +8,6 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
   const location = useLocation();
-
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(clearUser());
@@ -37,11 +35,6 @@ const Navbar = () => {
     );
   }
 
-  // Navbar for LOGGED IN user
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
   return (
     <nav className="navbar navbar-expand-lg navbar-dark custom-navbar">
       <div className="container-fluid">
@@ -50,42 +43,18 @@ const Navbar = () => {
           EasyShift
         </span>
 
-        {/* Logo on the right (not clickable)
-        <span className="navbar-brand mb-0 ms-auto me-2" style={{ pointerEvents: 'none' }}>
-          <img src={logo} alt="Logo" width="120" height="auto" />
-        </span> */}
-
-        {/* Hamburger button (visible on mobile) */}
-        <button
-          className="navbar-toggler"
-          type="button"
-          onClick={toggleMenu}
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        {/* Collapsible menu (mobile) */}
-        <div className={`collapse navbar-collapse ${menuOpen ? 'show' : ''}`} id="navbarResponsive">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-            {/* Greeting with wave emoji */}
-            <li className="nav-item d-flex align-items-center me-3">
-              <span className="text-white">👋 Hello, {user.first_name}!</span>
-            </li>
-            {/* Logout button */}
-            <li className="nav-item">
-              <button className="btn btn-danger" onClick={handleLogout}>
-                Log Out
-              </button>
-            </li>
-            {/* Additional logo inside the menu on mobile, if needed */}
-            <li className="nav-item d-lg-none mt-3">
-              <div style={{ pointerEvents: 'none' }}>
-                <img src={logo} alt="Logo" width="100" height="auto" />
-              </div>
-            </li>
-          </ul>
+        {/* Greeting and Logout button for Desktop */}
+        <div className="d-none d-lg-flex align-items-center ms-auto">
+          <span className="text-white me-3">👋 Hello, {user.first_name}!</span>
+          <button className="btn btn-danger" onClick={handleLogout}>
+            Log Out
+          </button>
         </div>
+
+        {/* Logout button for Mobile */}
+        <button className="btn btn-danger d-lg-none ms-auto" onClick={handleLogout}>
+          Log Out
+        </button>
       </div>
     </nav>
   );
