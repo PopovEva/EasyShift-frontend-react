@@ -9,6 +9,8 @@ import {
 } from '../../slices/createScheduleSlice';
 import API from '../../api/axios';
 import { toast } from 'react-toastify';
+import WeekPicker from '../../components/WeekPicker';
+import { formatDateToYMD } from '../../utils/dateUtils';
 
 const CreateSchedule = () => {
   const dispatch = useDispatch();
@@ -115,11 +117,11 @@ const CreateSchedule = () => {
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label">Start Date (from Sunday):</label>
-                <input
-                  type="date"
+                <WeekPicker
+                  selected={startDate}
+                  onWeekChange={(date) => dispatch(setStartDate(formatDateToYMD(date)))}
+                  placeholderText="Select week (Sunday)"
                   className="form-control"
-                  value={startDate}
-                  onChange={(e) => dispatch(setStartDate(e.target.value))}
                 />
               </div>
               <div className="mb-3">

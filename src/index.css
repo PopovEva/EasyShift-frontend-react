@@ -78,3 +78,7 @@ html, body {
   word-wrap: break-word;
   white-space: pre-wrap;
 }
+
+.react-datepicker-popper {
+  z-index: 2000 !important;
+}
