@@ -1,48 +1,48 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// Создаем экземпляр Axios
+// Create an Axios instance
 const API = axios.create({
-  baseURL: 'http://localhost:8000/api/', // Убедитесь, что ваш API доступен по этому адресу
+  baseURL: 'http://localhost:8000/api/',
 });
 
-// Интерсептор запросов для добавления токена
+// Request interceptor to add the token
 API.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem('access_token'); // Получаем токен из localStorage
+    const accessToken = localStorage.getItem('access_token'); // Get token from localStorage
     if (accessToken) {
-      config.headers['Authorization'] = `Bearer ${accessToken}`; // Добавляем заголовок авторизации
+      config.headers['Authorization'] = `Bearer ${accessToken}`; // Add Authorization header
     }
     return config;
   },
   (error) => {
-    toast.error('Ошибка при отправке запроса!'); // Показываем уведомление об ошибке
-    return Promise.reject(error); // Обрабатываем ошибки в запросе
+    toast.error('Request sending error!'); // Show notification on request error
+    return Promise.reject(error); // Handle request errors
   }
 );
 
-// Интерсептор ответов для обработки ошибок 401 (Unauthorized)
+// Response interceptor to handle 401 errors (Unauthorized)
 API.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     const refreshToken = localStorage.getItem('refresh_token');
 
-    // Если токен истек и есть refresh-токен
+    // If token is expired and refresh token exists
     if (error.response) {
-      // Обработка ошибки 401 (Unauthorized)
+      // Handle 401 Unauthorized error
       if (error.response.status === 401) {
         if (!refreshToken) {
-            // Если refresh-токена нет, разлогиниваем пользователя
+            // If no refresh token, log out user
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             window.location.href = '/';
-            toast.error('Сессия истекла. Пожалуйста, войдите снова.');
+            toast.error('Session expired. Please log in again.');
             return Promise.reject(error);
         }
     
         if (originalRequest._retry) {
-            // Если запрос уже был повторён, прекращаем бесконечный цикл
+            // Prevent infinite retry loop 
             return Promise.reject(error);
         }
     
@@ -58,28 +58,28 @@ API.interceptors.response.use(
     
             return API(originalRequest);
         } catch (refreshError) {
-            // Очистка токенов и разлогинивание при ошибке обновления
+            // Clear tokens and log out on refresh failure
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             window.location.href = '/';
-            toast.error('Сессия истекла. Пожалуйста, войдите снова.');
+            toast.error('Session expired. Please log in again.');
             return Promise.reject(refreshError);
         }
       }
-    // Обработка других ошибок
+    // Handle other response errors
     if (error.response.status === 403) {
-      toast.error('Доступ запрещен!');
+      toast.error('Access denied!');
     } else if (error.response.status === 500) {
-      toast.error('Ошибка сервера!');
+      toast.error('Server error! Please try again later.');
     } else {
-      toast.error(`Ошибка: ${error.response.data.detail || 'Произошла ошибка'}`);
+      toast.error(`Error: ${error.response.data.detail || 'An error occurred'}`);
     }
   } else {
-    // Обработка сетевых ошибок
-    toast.error('Ошибка соединения с сервером.');
+    // Handle network errors
+    toast.error('Connection error with the server. Please try again later!');
   }
 
-    return Promise.reject(error); // Обрабатываем остальные ошибки
+    return Promise.reject(error); // Handle all other errors
   }
 );
 
