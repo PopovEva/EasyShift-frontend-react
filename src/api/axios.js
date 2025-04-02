@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 
 // Create an Axios instance
 const API = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
 // Request interceptor to add the token
@@ -49,7 +49,7 @@ API.interceptors.response.use(
         originalRequest._retry = true;
     
         try {
-            const response = await axios.post('http://localhost:8000/api/token/refresh/', {
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}token/refresh/`, {
                 refresh: refreshToken,
             });
     
