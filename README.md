@@ -15,6 +15,26 @@ This repository contains the frontend implementation for **EasyShift**, a user-f
 - **React Toastify**
 - **Custom WeekPicker** to ensure Sunday-based week selection
 
+## 🌐 Live Deployment
+
+- 🖥️ **Live App:** [https://easyshift.vercel.app](https://easyshift.vercel.app)
+---
+
+## 👤 Demo Accounts
+
+Use the following demo accounts to explore the system:
+
+### 🔑 Admin Login
+- **Email:** `Adi`
+- **Password:** `adiadi`
+
+### 👷 Worker Login
+- **Email:** `Tom`
+- **Password:** `123123`
+
+---
+💡 Once logged in, you can switch between admin and worker interfaces to test the full functionality of the app (schedule management, preferences, etc.).
+
 ## 🖥 User Interface
 
 The frontend includes:
